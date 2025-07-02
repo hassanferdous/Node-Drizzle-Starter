@@ -5,6 +5,8 @@ import { route } from "./routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import dotenv from "dotenv";
 import "./config/db"; // Just import to ensure DB is connected
+import "./config/passport";
+import passport from "passport";
 
 const app = express();
 
@@ -12,6 +14,7 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(passport.initialize());
 app.use("/api", route);
 app.use(errorHandler);
 
