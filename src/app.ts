@@ -7,11 +7,13 @@ import dotenv from "dotenv";
 import "./config/db"; // Just import to ensure DB is connected
 import "./config/passport";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 dotenv.config();
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(passport.initialize());

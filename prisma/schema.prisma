@@ -42,3 +42,9 @@ model Category {
    Post   Post?  @relation(fields: [postId], references: [id])
    postId Int?
 }
+
+model RefreshToken {
+   id            Int    @id @default(autoincrement())
+   refresh_token String @db.Text
+   userId        Int
+}

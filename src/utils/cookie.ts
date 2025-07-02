@@ -23,13 +23,13 @@ export function setCookie(
 		sameSite: options.sameSite ?? "lax",
 		domain: options.domain,
 	});
+
+	console.log({ options });
 }
 
 export interface TokenOptions {
 	access_token?: string;
 	refresh_token?: string;
-	accessTokenOptions?: SetCookieOptions;
-	refreshTokenOptions?: SetCookieOptions;
 }
 
 export function setAuthCookies(res: Response, tokens: TokenOptions): void {
@@ -39,8 +39,7 @@ export function setAuthCookies(res: Response, tokens: TokenOptions): void {
 			secure: false,
 			sameSite: "lax",
 			path: "/",
-			maxAge: 60 * 10, // 10min
-			...tokens.accessTokenOptions,
+			maxAge: 60 * 10 * 1000, // 10min
 		});
 	}
 
@@ -50,8 +49,7 @@ export function setAuthCookies(res: Response, tokens: TokenOptions): void {
 			secure: false,
 			sameSite: "lax",
 			path: "/",
-			maxAge: 60 * 60 * 24, // 1day
-			...tokens.refreshTokenOptions,
+			maxAge: 60 * 60 * 1000 * 24, // 1day
 		});
 	}
 }
