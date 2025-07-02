@@ -18,13 +18,13 @@ pnpm install
 Run the following command to apply Prisma migrations to your PostgreSQL database:
 
 ```bash
-pnpm prisma migrate deploy
+npx prisma migrate deploy
 ```
 
 or, for development:
 
 ```bash
-pnpm prisma migrate dev
+npx prisma migrate dev
 ```
 
 ## 4. Generate API (Prisma Model)
@@ -32,7 +32,7 @@ pnpm prisma migrate dev
 To create a new model, edit your `prisma/schema.prisma` file and add your model definition. Then generate the Prisma client:
 
 ```bash
-pnpm prisma generate
+npx prisma generate
 ```
 
 ## 5. Seed Data
@@ -40,7 +40,7 @@ pnpm prisma generate
 To seed your database with initial data, run:
 
 ```bash
-pnpm prisma db seed
+npx prisma db seed
 ```
 
 _(Ensure you have a `prisma/seed.ts` or `prisma/seed.js` file set up for seeding.)_
