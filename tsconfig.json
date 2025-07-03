@@ -12,7 +12,8 @@
 		"@/*": ["src/*"],
 		"@api/*": ["src/api/*"],
 		"@middlewares/*": ["src/middlewares/*"],
-		"@utils/*": ["src/utils/*"]
+		"@utils/*": ["src/utils/*"],
+		"@db/*": ["src/db/*"]
 	 }
   }
 }

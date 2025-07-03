@@ -1,8 +1,15 @@
 import { Router } from "express";
-import { v1Router } from "./v1";
-
+import exampleRoutes from "@/api/v1/example";
+import blogRoutes from "@/api/v1/blog";
+import authRoutes from "@/api/v1/auth";
 const router = Router();
 
-router.use("/v1", v1Router);
+function defineRoutes(expressRouter: Router) {
+	// exampleRoutes(expressRouter);
+	authRoutes(expressRouter);
+	blogRoutes(expressRouter);
+}
 
-export { router as route };
+defineRoutes(router);
+
+export default router;

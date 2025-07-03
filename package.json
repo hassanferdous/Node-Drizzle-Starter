@@ -6,10 +6,8 @@
 		"build:watch": "tsc --watch",
 		"start": "node dist/server.js",
 		"dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
-		"generate:api": "node src/scripts/generate-api.js"
-	},
-	"prisma": {
-		"seed": "ts-node prisma/seed.ts"
+		"generate:api": "node src/scripts/generate-api.js",
+		"seed-db": "ts-node src/seed.ts"
 	},
 	"dependencies": {
 		"@prisma/client": "^6.10.1",
@@ -17,11 +15,13 @@
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
 		"dotenv": "^16.0.3",
+		"drizzle-orm": "^0.44.2",
 		"express": "^5.1.0",
 		"jsonwebtoken": "^9.0.2",
 		"morgan": "^1.10.0",
 		"passport": "^0.7.0",
 		"passport-local": "^1.0.0",
+		"pg": "^8.16.3",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
@@ -33,7 +33,9 @@
 		"@types/node": "^18.19.113",
 		"@types/passport": "^1.0.17",
 		"@types/passport-local": "^1.0.38",
+		"@types/pg": "^8.15.4",
 		"concurrently": "^9.2.0",
+		"drizzle-kit": "^0.31.4",
 		"nodemon": "^3.1.10",
 		"prisma": "^6.10.1",
 		"ts-node": "^10.9.2",
