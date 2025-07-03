@@ -23,8 +23,6 @@ export function setCookie(
 		sameSite: options.sameSite ?? "lax",
 		domain: options.domain,
 	});
-
-	console.log({ options });
 }
 
 export interface TokenOptions {

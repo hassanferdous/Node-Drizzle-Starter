@@ -10,6 +10,11 @@ passport.use(
 			where: {
 				email: email,
 			},
+			omit: {
+				createdAt: true,
+				updatedAt: true,
+				img: true,
+			},
 		});
 		if (!user) {
 			return cb(null, false, { message: "Incorrect email or password." });
@@ -20,13 +25,19 @@ passport.use(
 		}
 		const { password: userPassword, ...santizedUser } = user;
 		// generate tokens
-		const tokens = generateToken(santizedUser);
-		await prisma.refreshToken.create({
+		const tokens = generateToken({ user: santizedUser });
+		const currentSession = await prisma.refreshToken.create({
 			data: {
 				refresh_token: tokens.refresh_token as string,
 				userId: santizedUser.id,
 			},
 		});
-		return cb(null, { ...santizedUser, ...tokens, password: null });
+		return cb(null, {
+			...santizedUser,
+			...tokens,
+			refresh_token:
+				currentSession.id.toString() + "|" + tokens.refresh_token,
+			password: null,
+		});
 	})
 );

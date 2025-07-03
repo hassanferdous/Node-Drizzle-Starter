@@ -48,7 +48,7 @@ export const verifyToken = (
 	const secret =
 		type === "access"
 			? process.env.JWT_ACCESSTOKEN_SECRET
-			: process.env.JWT_ACCESSTOKEN_SECRET;
+			: process.env.JWT_REFRESHTOKEN_SECRET;
 	const decoded = jwt.verify(token, secret as string);
 	return decoded;
 };
