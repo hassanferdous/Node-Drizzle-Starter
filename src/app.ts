@@ -5,7 +5,7 @@ import { route } from "./routes";
 import { errorHandler } from "@middlewares/error.middleware";
 import dotenv from "dotenv";
 import "@/config/db"; // Just import to ensure DB is connected
-import "@/config/db";
+import "@/config/passport";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 
