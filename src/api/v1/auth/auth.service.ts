@@ -1,5 +1,5 @@
 import prisma from "../../../config/db";
-import { generateToken } from "../../../utils/jwt";
+import { generateToken } from "@utils/jwt";
 
 export const AuthService = {
 	// getAllAuths: async () => {

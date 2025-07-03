@@ -23,7 +23,7 @@ fs.writeFileSync(
 	path.join(baseDir, `${entityName}.controller.ts`),
 	`import { Request, Response } from "express";
 import { ${capitalized}Service } from "./${entityName}.service";
-import { sendSuccess } from "../../../utils/response";
+import { sendSuccess } from "@utils/response";
 export const ${capitalized}Controller = {
 	getAll${capitalized}s: async (_req: Request, res: Response) => {
 		const data = await ${capitalized}Service.getAll${capitalized}s();
@@ -36,7 +36,7 @@ export const ${capitalized}Controller = {
 // --- service.ts ---
 fs.writeFileSync(
 	path.join(baseDir, `${entityName}.service.ts`),
-	`import prisma from "../../../config/db";
+	`import prisma from "@/config/db";
 
 export const ${capitalized}Service = {
 	getAll${capitalized}s: async () => {

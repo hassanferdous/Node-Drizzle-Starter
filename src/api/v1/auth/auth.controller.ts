@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { User } from "../../../../generated/prisma";
-import { setAuthCookies, TokenOptions } from "../../../utils/cookie";
-import { throwError } from "../../../utils/error";
-import { generateToken, verifyToken } from "../../../utils/jwt";
-import { sendSuccess } from "../../../utils/response";
+import { setAuthCookies, TokenOptions } from "@utils/cookie";
+import { throwError } from "@utils/error";
+import { generateToken, verifyToken } from "@utils/jwt";
+import { sendSuccess } from "@utils/response";
 import { AuthService } from "./auth.service";
 export const AuthController = {
 	credential: (req: Request, res: Response, next: NextFunction) => {

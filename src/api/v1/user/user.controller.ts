@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { sendSuccess } from "../../../utils/response";
+import { sendSuccess } from "@utils/response";
 import { UserService } from "./user.service";
 
 export const UserController = {

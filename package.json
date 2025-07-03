@@ -5,7 +5,7 @@
 	"scripts": {
 		"build:watch": "tsc --watch",
 		"start": "node dist/server.js",
-		"dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+		"dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
 		"generate:api": "node src/scripts/generate-api.js"
 	},
 	"prisma": {
@@ -38,6 +38,7 @@
 		"prisma": "^6.10.1",
 		"ts-node": "^10.9.2",
 		"ts-node-dev": "^2.0.0",
+		"tsconfig-paths": "^4.2.0",
 		"typescript": "^5.8.3"
 	}
 }

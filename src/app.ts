@@ -2,10 +2,10 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { route } from "./routes";
-import { errorHandler } from "./middlewares/error.middleware";
+import { errorHandler } from "@middlewares/error.middleware";
 import dotenv from "dotenv";
-import "./config/db"; // Just import to ensure DB is connected
-import "./config/passport";
+import "@/config/db"; // Just import to ensure DB is connected
+import "@/config/db";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 
