@@ -29,6 +29,23 @@ export const role_permissions = pgTable(
 	})
 );
 
+export const userPermissions = pgTable(
+	"user_permissions",
+	{
+		userId: integer("user_id")
+			.notNull()
+			.references(() => usersTable.id),
+		permissionId: integer("permission_id")
+			.notNull()
+			.references(() => permissions.id)
+	},
+	(table) => ({
+		pk: primaryKey({
+			columns: [table.userId, table.permissionId]
+		})
+	})
+);
+
 export const usersTable = pgTable("users", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	name: varchar({ length: 255 }),

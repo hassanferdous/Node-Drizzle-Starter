@@ -23,15 +23,19 @@ export const services = {
 				if (!user) {
 					throwError(info?.message || "Invalid credentials", 401);
 				}
-				const tokens = generateToken({ user });
+				const permissions = await userServies.getPermissionsByRoleId(
+					user.roleId as number
+				);
+				const userWithPermision = { ...user, permissions };
+				const tokens = generateToken({ user: userWithPermision });
 				setAuthCookies(res, tokens as TokenOptions);
 				const responseData = {
-					user,
-					...tokens,
+					user: userWithPermision,
+					...tokens
 				};
 				await userServies.createRefreshUserToken({
 					userId: user.id,
-					refreshToken: tokens.refresh_token as string,
+					refreshToken: tokens.refresh_token as string
 				});
 
 				// Success — you can return user data or generate JWT
@@ -55,6 +59,7 @@ export const services = {
 			const decodeded = verifyToken(token, "refresh") as JwtPayload & {
 				user: User;
 			};
+			console.log({ decodeded });
 			if (decodeded.exp! > Date.now())
 				return throwError("Invalid Token", 401);
 			const storedToken = await userServies.getRefreshUserToken(
@@ -66,14 +71,13 @@ export const services = {
 			return sendSuccess(
 				res,
 				{
-					access_token: new_token.access_token,
+					access_token: new_token.access_token
 				},
 				201,
 				"Successfully generated Access Token!!"
 			);
 		} catch (error) {
-			console.log(error);
 			throwError("Invalid Token", 401);
 		}
-	},
+	}
 };

@@ -1,14 +1,34 @@
 import { db } from "@/config/db";
-import { usersTable, userTokensTable } from "@/db/schema";
-import { eq, InferInsertModel, InferSelectModel } from "drizzle-orm";
+import {
+	permissions,
+	role_permissions,
+	usersTable,
+	userTokensTable
+} from "@/db/schema";
+import { eq, InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
 import { NewRefreshToken } from "../auth/service";
+import bcrypt from "bcryptjs";
 
-export type User = InferSelectModel<typeof usersTable>;
+export type User = Omit<InferSelectModel<typeof usersTable>, "password">;
 export type NewUser = InferInsertModel<typeof usersTable>;
 
 export const services = {
 	create: async (data: NewUser): Promise<User> => {
-		const [created] = await db.insert(usersTable).values(data).returning();
+		const hashedPassword = await bcrypt.hash(
+			"test1234",
+			Number(process.env.HASH_SALT)
+		);
+		const [created] = await db
+			.insert(usersTable)
+			.values({ ...data, password: hashedPassword })
+			.returning({
+				id: usersTable.id,
+				name: usersTable.name,
+				email: usersTable.email,
+				age: usersTable.age,
+				img: usersTable.img,
+				roleId: usersTable.roleId
+			});
 		return created;
 	},
 
@@ -33,7 +53,7 @@ export const services = {
 			.select({
 				id: usersTable.id,
 				name: usersTable.name,
-				email: usersTable.email,
+				email: usersTable.email
 			})
 			.from(usersTable);
 	},
@@ -67,4 +87,16 @@ export const services = {
 		const result = await db.insert(userTokensTable).values(data);
 		return result;
 	},
+	getPermissionsByRoleId: async (roleId: number) => {
+		const result = await db.execute(
+			sql`
+			SELECT array_agg(${permissions.name}) AS permissions
+			FROM ${role_permissions}
+			LEFT JOIN ${permissions}
+			ON ${role_permissions.permissionId} = ${permissions.id}
+			WHERE ${role_permissions.roleId} = ${roleId}
+		`
+		);
+		return result.rows[0]?.permissions ?? [];
+	}
 };
