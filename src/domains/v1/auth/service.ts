@@ -66,7 +66,7 @@ export const services = {
 				decodeded.user.id
 			);
 			if (!storedToken) return throwError("Refresh token not found", 403);
-			const new_token = generateToken(decodeded.user, "access");
+			const new_token = generateToken({ user: decodeded.user }, "access");
 			setAuthCookies(res, { access_token: new_token.access_token });
 			return sendSuccess(
 				res,
