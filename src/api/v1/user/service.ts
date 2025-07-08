@@ -28,8 +28,14 @@ export const services = {
 		return result[0] ?? null;
 	},
 
-	getAll: async (): Promise<User[]> => {
-		return db.select().from(usersTable);
+	getAll: async (): Promise<Pick<User, "id" | "name" | "email">[]> => {
+		return db
+			.select({
+				id: usersTable.id,
+				name: usersTable.name,
+				email: usersTable.email,
+			})
+			.from(usersTable);
 	},
 
 	update: async (id: number, data: NewUser): Promise<User | null> => {

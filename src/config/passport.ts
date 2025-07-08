@@ -13,7 +13,7 @@ passport.use(
 		if (!isMatched) {
 			return cb(null, false, { message: "Incorrect email or password." });
 		}
-		const { password: userPassword, ...santizedUser } = user;
+		const { password: userPassword, img, age, ...santizedUser } = user;
 		return cb(null, santizedUser);
 	})
 );

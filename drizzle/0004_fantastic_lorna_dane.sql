@@ -1,1 +1,0 @@
-ALTER TABLE "user_tokens" ALTER COLUMN "createdAt" DROP NOT NULL;

@@ -12,6 +12,8 @@ router.post("/", async (req: Request, res: Response) => {
 
 // Read all
 router.get("/", async (req: Request, res: Response) => {
+	console.log(req.user);
+
 	const data = await services.getAll();
 	sendSuccess(res, data, 200, "Successfully fetched all user!");
 });
