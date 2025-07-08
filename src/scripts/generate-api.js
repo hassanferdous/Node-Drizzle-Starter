@@ -10,7 +10,7 @@ if (!collectionName) {
 
 const capitalized =
 	collectionName.charAt(0).toUpperCase() + collectionName.slice(1);
-const baseDir = `src/api/v1/${collectionName}`;
+const baseDir = `src/domains/v1/${collectionName}`;
 
 if (fs.existsSync(baseDir)) {
 	console.error(`❌ Directory already exists: ${baseDir}`);
@@ -172,4 +172,6 @@ export const idParamSchema = z.object({
 `
 );
 
-console.log(`✅ ${capitalized} api generated in /src/api/v1/${collectionName}`);
+console.log(
+	`✅ ${capitalized} api generated in /src/domains/v1/${collectionName}`
+);
