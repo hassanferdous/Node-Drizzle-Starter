@@ -3,7 +3,7 @@ import { setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { throwError } from "@/utils/error";
 import { generateToken, verifyToken } from "@/utils/jwt";
 import { sendSuccess } from "@/utils/response";
-import { services as userServies } from "@api/v1/user/service";
+import { services as userServies } from "@domains/v1/user/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";

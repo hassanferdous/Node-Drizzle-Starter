@@ -38,5 +38,5 @@ export const services = {
 			.where(eq(examplesTable.id, id))
 			.returning();
 		return deleted ?? null;
-	},
+	}
 };

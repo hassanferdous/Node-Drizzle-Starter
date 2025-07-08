@@ -1,4 +1,4 @@
-import { services as userServices } from "@api/v1/user/service";
+import { services as userServices } from "@domains/v1/user/service";
 import bcrypt from "bcryptjs";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";

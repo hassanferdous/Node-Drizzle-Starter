@@ -10,7 +10,7 @@
 	 "baseUrl": ".",
 	 "paths": {
 		"@/*": ["src/*"],
-		"@api/*": ["src/api/*"],
+		"@domains/*": ["src/domains/*"],
 		"@middlewares/*": ["src/middlewares/*"],
 		"@utils/*": ["src/utils/*"],
 		"@db/*": ["src/db/*"]

@@ -1,8 +1,8 @@
 import { Router } from "express";
-import exampleRoutes from "@/api/v1/example";
-import blogRoutes from "@/api/v1/blog";
-import authRoutes from "@/api/v1/auth";
-import usersRoutes from "@/api/v1/user";
+import exampleRoutes from "@domains/v1/example";
+import blogRoutes from "@domains/v1/blog";
+import authRoutes from "@domains/v1/auth";
+import usersRoutes from "@domains/v1/user";
 import { throwError } from "@/utils/error";
 import { sendSuccess } from "@/utils/response";
 const router = Router();

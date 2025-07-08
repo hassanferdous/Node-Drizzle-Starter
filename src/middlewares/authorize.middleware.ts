@@ -1,4 +1,4 @@
-import { User } from "@/api/v1/user/service";
+import { User } from "@domains/v1/user/service";
 import { throwError } from "@/utils/error";
 import { NextFunction, Request, Response } from "express";
 type Permisions = string[];

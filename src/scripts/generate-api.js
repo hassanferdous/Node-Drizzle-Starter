@@ -117,7 +117,7 @@ export const services = {
 // --- index.ts ---
 fs.writeFileSync(
 	path.join(baseDir, `index.ts`),
-	`import router from "@/api/v1/${collectionName}/api";
+	`import router from "@domains/v1/${collectionName}/api";
 import { Router } from "express";
 export default function defineRoutes(expressRouter: Router) {
 	expressRouter.use("/${collectionName}s", router);
