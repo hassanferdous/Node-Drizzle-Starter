@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import jwt from "jsonwebtoken";
 type TokenType = "access" | "refresh" | "both";
 export const generateToken = (payload: any, type: TokenType = "both") => {
@@ -6,34 +7,34 @@ export const generateToken = (payload: any, type: TokenType = "both") => {
 		case "both":
 			tokens.access_token = jwt.sign(
 				payload,
-				process.env.JWT_ACCESSTOKEN_SECRET as string,
+				config.auth.jwtAccessTokenSecret,
 				{
-					expiresIn: process.env.ACCESSTOKEN_DURATION as any,
+					expiresIn: config.auth.accessTokenDuration as any
 				}
 			);
 			tokens.refresh_token = jwt.sign(
 				payload,
-				process.env.JWT_REFRESHTOKEN_SECRET as string,
+				config.auth.jwtRefreshTokenSecret,
 				{
-					expiresIn: process.env.REFRESHTOKEN_DURATION as any,
+					expiresIn: config.auth.refreshTokenDuration as any
 				}
 			);
 			break;
 		case "access":
 			tokens.access_token = jwt.sign(
 				payload,
-				process.env.JWT_ACCESSTOKEN_SECRET as string,
+				config.auth.jwtAccessTokenSecret,
 				{
-					expiresIn: process.env.ACCESSTOKEN_DURATION as any,
+					expiresIn: config.auth.accessTokenDuration as any
 				}
 			);
 			break;
 		case "refresh":
 			tokens.refresh_token = jwt.sign(
 				payload,
-				process.env.JWT_REFRESHTOKEN_SECRET as string,
+				config.auth.jwtRefreshTokenSecret,
 				{
-					expiresIn: process.env.REFRESHTOKEN_DURATION as any,
+					expiresIn: config.auth.refreshTokenDuration as any
 				}
 			);
 			break;
@@ -47,8 +48,8 @@ export const verifyToken = (
 ) => {
 	const secret =
 		type === "access"
-			? process.env.JWT_ACCESSTOKEN_SECRET
-			: process.env.JWT_REFRESHTOKEN_SECRET;
-	const decoded = jwt.verify(token, secret as string);
+			? config.auth.jwtAccessTokenSecret
+			: config.auth.jwtRefreshTokenSecret;
+	const decoded = jwt.verify(token, secret);
 	return decoded;
 };

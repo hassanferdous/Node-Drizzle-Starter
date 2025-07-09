@@ -7,8 +7,11 @@ export const config = {
 	},
 	db: {
 		uri: env.DATABASE_URL
+	},
+	auth: {
+		jwtAccessTokenSecret: env.JWT_ACCESSTOKEN_SECRET,
+		jwtRefreshTokenSecret: env.JWT_REFRESHTOKEN_SECRET,
+		accessTokenDuration: env.ACCESSTOKEN_DURATION,
+		refreshTokenDuration: env.REFRESHTOKEN_DURATION
 	}
-	// auth: {
-	// 	jwtSecret: env.JWT_SECRET
-	// }
 };

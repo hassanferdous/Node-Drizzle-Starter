@@ -16,8 +16,12 @@ const envSchema = z.object({
 		.enum(["development", "production", "test"])
 		.default("development"),
 	PORT: z.string().default("3000"),
-	DATABASE_URL: z.string().url()
-	// JWT_SECRET: z.string().min(1)
+	DATABASE_URL: z.string().url(),
+	HASH_SALT: z.string().min(1),
+	JWT_ACCESSTOKEN_SECRET: z.string().min(1),
+	JWT_REFRESHTOKEN_SECRET: z.string().min(1),
+	ACCESSTOKEN_DURATION: z.string().min(1),
+	REFRESHTOKEN_DURATION: z.string().min(1)
 });
 
 // Validate and parse
