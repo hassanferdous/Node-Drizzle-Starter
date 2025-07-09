@@ -1,19 +1,18 @@
-import { Router } from "express";
-import exampleRoutes from "@domains/v1/example";
-import blogRoutes from "@domains/v1/blog";
-import authRoutes from "@domains/v1/auth";
-import usersRoutes from "@domains/v1/user";
+import { db } from "@/config/db";
 import { throwError } from "@/utils/error";
 import { sendSuccess } from "@/utils/response";
-import { db } from "@/config/db";
-import { usersTable } from "@/db/schema";
+import authRoutes from "@domains/v1/auth";
+import blogRoutes from "@domains/v1/blog";
+import usersRoutes from "@domains/v1/user";
+import { sql } from "drizzle-orm";
+import { Router } from "express";
 const router = Router();
 
 function defaultRoutes(expressRouter: Router) {
 	expressRouter.get("/health", async (req, res) => {
 		try {
 			// Check database connection
-			await db.select().from(usersTable).limit(1);
+			await db.execute(sql`SELECT 1`);
 
 			sendSuccess(
 				res,
