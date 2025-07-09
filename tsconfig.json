@@ -1,19 +1,19 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "rootDir": ".",
-    "outDir": "dist",
-    "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
-	 "baseUrl": ".",
-	 "paths": {
-		"@/*": ["src/*"],
-		"@domains/*": ["src/domains/*"],
-		"@middlewares/*": ["src/middlewares/*"],
-		"@utils/*": ["src/utils/*"],
-		"@db/*": ["src/db/*"]
-	 }
-  }
+	"compilerOptions": {
+		"target": "ES2020",
+		"module": "commonjs",
+		"rootDir": ".",
+		"outDir": "dist",
+		"esModuleInterop": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"],
+			"@domains/*": ["src/domains/*"],
+			"@middlewares/*": ["src/middlewares/*"],
+			"@utils/*": ["src/utils/*"],
+			"@db/*": ["src/db/*"]
+		}
+	}
 }

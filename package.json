@@ -14,7 +14,7 @@
 		"bcryptjs": "^3.0.2",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
-		"dotenv": "^16.0.3",
+		"dotenv": "^16.6.1",
 		"drizzle-orm": "^0.44.2",
 		"express": "^5.1.0",
 		"jsonwebtoken": "^9.0.2",
@@ -27,6 +27,7 @@
 	"devDependencies": {
 		"@types/cookie-parser": "^1.4.9",
 		"@types/cors": "^2.8.19",
+		"@types/dotenv": "^8.2.3",
 		"@types/express": "^4.17.17",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@types/morgan": "^1.9.10",
