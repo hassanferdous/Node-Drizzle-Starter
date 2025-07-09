@@ -1,23 +1,12 @@
-import { app } from "./app";
 import dotenv from "dotenv";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
+import { app } from "./app";
+import { db } from "./config/db";
+import { config } from "./config";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5001;
-const db = drizzle(process.env.DATABASE_URL!);
-
-async function testDatabaseConnection() {
-	try {
-		await db.execute(sql`SELECT 1`);
-		console.log("✅ Database connection successful");
-		return true;
-	} catch (error) {
-		console.error("❌ Database connection failed:", (error as Error).message);
-		return false;
-	}
-}
+const PORT = config.app.port || 5001;
 
 async function waitForDatabase(maxRetries = 5, delay = 2000) {
 	console.log("🔍 Testing database connection...");
