@@ -3,6 +3,7 @@ import { services } from "./service";
 import { sendSuccess } from "@/utils/response";
 import auth from "@/middlewares/auth.middleware";
 import authorize from "@/middlewares/authorize.middleware";
+import redis from "@/lib/redis";
 
 const router = express.Router();
 
@@ -21,9 +22,21 @@ router.post(
 router.get(
 	"/",
 	auth,
-	authorize(["create_user"]),
+	// authorize(["create_user"]),
 	async (req: Request, res: Response) => {
+		const key = "users:list";
+		const cached = await redis.get(key);
+		if (cached) {
+			return sendSuccess(
+				res,
+				JSON.parse(cached),
+				200,
+				"Successfully fetched all user!"
+			);
+		}
+
 		const data = await services.getAll();
+		await redis.set(key, JSON.stringify(data), "NX");
 		sendSuccess(res, data, 200, "Successfully fetched all user!");
 	}
 );

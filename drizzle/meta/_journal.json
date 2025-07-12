@@ -8,6 +8,13 @@
       "when": 1751691562376,
       "tag": "0000_smart_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752342246180,
+      "tag": "0001_friendly_ogun",
+      "breakpoints": true
     }
   ]
 }

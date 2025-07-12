@@ -59,7 +59,6 @@ export const services = {
 			const decodeded = verifyToken(token, "refresh") as JwtPayload & {
 				user: User;
 			};
-			console.log({ decodeded });
 			if (decodeded.exp! > Date.now())
 				return throwError("Invalid Token", 401);
 			const storedToken = await userServies.getRefreshUserToken(

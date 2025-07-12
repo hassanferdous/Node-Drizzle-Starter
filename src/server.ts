@@ -6,9 +6,7 @@ import { config } from "./config";
 
 dotenv.config();
 
-const PORT = config.app.port || 5001;
-
-console.log(config, "server.js***********");
+const PORT = config.app.port || 8000;
 
 async function waitForDatabase(maxRetries = 5, delay = 2000) {
 	console.log("🔍 Testing database connection...");

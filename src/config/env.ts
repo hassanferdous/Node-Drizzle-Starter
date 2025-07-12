@@ -21,13 +21,16 @@ const envSchema = z.object({
 	JWT_ACCESSTOKEN_SECRET: z.string().min(1),
 	JWT_REFRESHTOKEN_SECRET: z.string().min(1),
 	ACCESSTOKEN_DURATION: z.string().min(1),
-	REFRESHTOKEN_DURATION: z.string().min(1)
+	REFRESHTOKEN_DURATION: z.string().min(1),
+	POSTGRES_DB: z.string().min(1),
+	POSTGRES_USER: z.string().min(1),
+	POSTGRES_PASSWORD: z.string().min(1),
+	REDIS_HOST: z.string().min(1),
+	REDIS_PORT: z.string().min(1)
 });
 
 // Validate and parse
 const parsedEnv = envSchema.safeParse(process.env);
-
-console.log(process.env, "from env-fonfig");
 
 if (!parsedEnv.success) {
 	console.error("❌ Invalid environment variables:");

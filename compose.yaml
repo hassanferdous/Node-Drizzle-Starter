@@ -1,0 +1,42 @@
+services:
+  backend:
+    container_name: drizzle_express
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - HASH_SALT=${HASH_SALT}
+      - JWT_ACCESSTOKEN_SECRET=${JWT_ACCESSTOKEN_SECRET}
+      - JWT_REFRESHTOKEN_SECRET=${JWT_REFRESHTOKEN_SECRET}
+      - ACCESSTOKEN_DURATION=${ACCESSTOKEN_DURATION}
+      - REFRESHTOKEN_DURATION=${REFRESHTOKEN_DURATION}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      - postgres
+      - redis
+    command: npm run dev
+
+  postgres:
+    container_name: drizzle_postgres
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  redis:
+    container_name: redis_cache
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+volumes:
+  pgdata:
