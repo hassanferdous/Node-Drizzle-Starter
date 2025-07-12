@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const service_1 = require("./service");
-const response_1 = require("@/utils/response");
-const auth_middleware_1 = __importDefault(require("@/middlewares/auth.middleware"));
-const authorize_middleware_1 = __importDefault(require("@/middlewares/authorize.middleware"));
+const response_1 = require("../../../utils/response");
+const auth_middleware_1 = __importDefault(require("../../../middlewares/auth.middleware"));
+const authorize_middleware_1 = __importDefault(require("../../../middlewares/authorize.middleware"));
 const router = express_1.default.Router();
 // Create
 router.post("/", auth_middleware_1.default, (0, authorize_middleware_1.default)(["create_user"]), async (req, res) => {

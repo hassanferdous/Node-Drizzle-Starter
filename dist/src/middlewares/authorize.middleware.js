@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = authorize;
-const error_1 = require("@/utils/error");
+const error_1 = require("../utils/error");
 function authorize(permissions) {
     return (req, res, next) => {
         const user = req.user;

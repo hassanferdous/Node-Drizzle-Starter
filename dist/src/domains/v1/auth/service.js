@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.services = void 0;
-const cookie_1 = require("@/utils/cookie");
-const error_1 = require("@/utils/error");
-const jwt_1 = require("@/utils/jwt");
-const response_1 = require("@/utils/response");
-const service_1 = require("@domains/v1/user/service");
+const cookie_1 = require("../../../utils/cookie");
+const error_1 = require("../../../utils/error");
+const jwt_1 = require("../../../utils/jwt");
+const response_1 = require("../../../utils/response");
+const service_1 = require("../../v1/user/service");
 const passport_1 = __importDefault(require("passport"));
 exports.services = {
     credentialLogin: (req, res, next) => {
@@ -51,7 +51,7 @@ exports.services = {
             const storedToken = await service_1.services.getRefreshUserToken(decodeded.user.id);
             if (!storedToken)
                 return (0, error_1.throwError)("Refresh token not found", 403);
-            const new_token = (0, jwt_1.generateToken)(decodeded.user, "access");
+            const new_token = (0, jwt_1.generateToken)({ user: decodeded.user }, "access");
             (0, cookie_1.setAuthCookies)(res, { access_token: new_token.access_token });
             return (0, response_1.sendSuccess)(res, {
                 access_token: new_token.access_token

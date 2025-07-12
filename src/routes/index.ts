@@ -2,7 +2,6 @@ import { db } from "@/config/db";
 import { throwError } from "@/utils/error";
 import { sendSuccess } from "@/utils/response";
 import authRoutes from "@domains/v1/auth";
-import blogRoutes from "@domains/v1/blog";
 import usersRoutes from "@domains/v1/user";
 import { sql } from "drizzle-orm";
 import { Router } from "express";
@@ -47,7 +46,6 @@ function defineRoutes(expressRouter: Router) {
 	// exampleRoutes(expressRouter);
 	authRoutes(expressRouter);
 	usersRoutes(expressRouter);
-	blogRoutes(expressRouter);
 
 	// default routers
 	defaultRoutes(expressRouter);

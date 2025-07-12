@@ -27,6 +27,8 @@ const envSchema = z.object({
 // Validate and parse
 const parsedEnv = envSchema.safeParse(process.env);
 
+console.log(process.env, "from env-fonfig");
+
 if (!parsedEnv.success) {
 	console.error("❌ Invalid environment variables:");
 	console.error(parsedEnv.error.format());

@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.services = void 0;
-const db_1 = require("@/config/db");
-const schema_1 = require("@/db/schema");
+const db_1 = require("../../../config/db");
+const schema_1 = require("../../../db/schema");
 const drizzle_orm_1 = require("drizzle-orm");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 exports.services = {

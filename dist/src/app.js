@@ -9,10 +9,10 @@ const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
 const passport_1 = __importDefault(require("passport"));
 const dotenv_1 = __importDefault(require("dotenv"));
-require("@/config/db"); // Just import to ensure DB is connected
+require("./config/db"); // Just import to ensure DB is connected
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const error_middleware_1 = require("@middlewares/error.middleware");
-require("@/config/passport");
+const error_middleware_1 = require("./middlewares/error.middleware");
+require("./config/passport");
 const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
 exports.app = app;

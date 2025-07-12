@@ -4,26 +4,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = exports.generateToken = void 0;
+const config_1 = require("../config");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const generateToken = (payload, type = "both") => {
     let tokens = {};
     switch (type) {
         case "both":
-            tokens.access_token = jsonwebtoken_1.default.sign(payload, process.env.JWT_ACCESSTOKEN_SECRET, {
-                expiresIn: process.env.ACCESSTOKEN_DURATION,
+            tokens.access_token = jsonwebtoken_1.default.sign(payload, config_1.config.auth.jwtAccessTokenSecret, {
+                expiresIn: config_1.config.auth.accessTokenDuration
             });
-            tokens.refresh_token = jsonwebtoken_1.default.sign(payload, process.env.JWT_REFRESHTOKEN_SECRET, {
-                expiresIn: process.env.REFRESHTOKEN_DURATION,
+            tokens.refresh_token = jsonwebtoken_1.default.sign(payload, config_1.config.auth.jwtRefreshTokenSecret, {
+                expiresIn: config_1.config.auth.refreshTokenDuration
             });
             break;
         case "access":
-            tokens.access_token = jsonwebtoken_1.default.sign(payload, process.env.JWT_ACCESSTOKEN_SECRET, {
-                expiresIn: process.env.ACCESSTOKEN_DURATION,
+            tokens.access_token = jsonwebtoken_1.default.sign(payload, config_1.config.auth.jwtAccessTokenSecret, {
+                expiresIn: config_1.config.auth.accessTokenDuration
             });
             break;
         case "refresh":
-            tokens.refresh_token = jsonwebtoken_1.default.sign(payload, process.env.JWT_REFRESHTOKEN_SECRET, {
-                expiresIn: process.env.REFRESHTOKEN_DURATION,
+            tokens.refresh_token = jsonwebtoken_1.default.sign(payload, config_1.config.auth.jwtRefreshTokenSecret, {
+                expiresIn: config_1.config.auth.refreshTokenDuration
             });
             break;
     }
@@ -32,8 +33,8 @@ const generateToken = (payload, type = "both") => {
 exports.generateToken = generateToken;
 const verifyToken = (token, type = "access") => {
     const secret = type === "access"
-        ? process.env.JWT_ACCESSTOKEN_SECRET
-        : process.env.JWT_REFRESHTOKEN_SECRET;
+        ? config_1.config.auth.jwtAccessTokenSecret
+        : config_1.config.auth.jwtRefreshTokenSecret;
     const decoded = jsonwebtoken_1.default.verify(token, secret);
     return decoded;
 };

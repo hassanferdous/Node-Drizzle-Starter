@@ -3,8 +3,8 @@
 	"version": "1.0.0",
 	"main": "dist/server.js",
 	"scripts": {
-		"build:watch": "tsc --watch",
-		"start": "node dist/server.js",
+		"build": "tsc && tsc-alias",
+		"start": "NODE_ENV=production node dist/src/server.js",
 		"dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
 		"generate:api": "node src/scripts/generate-api.js",
 		"seed-db": "ts-node src/seed.ts"
@@ -41,6 +41,7 @@
 		"prisma": "^6.10.1",
 		"ts-node": "^10.9.2",
 		"ts-node-dev": "^2.0.0",
+		"tsc-alias": "^1.8.16",
 		"tsconfig-paths": "^4.2.0",
 		"typescript": "^5.8.3"
 	}

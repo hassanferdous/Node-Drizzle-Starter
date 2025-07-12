@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const config_1 = require("./src/config");
 require("dotenv/config");
 const drizzle_kit_1 = require("drizzle-kit");
 exports.default = (0, drizzle_kit_1.defineConfig)({
@@ -7,6 +8,6 @@ exports.default = (0, drizzle_kit_1.defineConfig)({
     schema: "./src/db/schema.ts",
     dialect: "postgresql",
     dbCredentials: {
-        url: process.env.DATABASE_URL,
-    },
+        url: config_1.config.db.uri
+    }
 });
