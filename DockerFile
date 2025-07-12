@@ -1,5 +1,5 @@
 # Base Image
-FROM node:23-alpine
+FROM node:24-alpine
 
 # Working directory
 WORKDIR /app
@@ -12,3 +12,7 @@ RUN npm install
 COPY . .
 
 RUN npm run build
+
+
+# Command to run the app
+CMD ["node", "dist/src/index.js"]
