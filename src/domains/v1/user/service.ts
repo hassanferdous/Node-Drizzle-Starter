@@ -2,6 +2,7 @@ import { db } from "@/config/db";
 import {
 	permissions,
 	role_permissions,
+	userPermissions,
 	usersTable,
 	userTokensTable
 } from "@/db/schema";
@@ -87,16 +88,34 @@ export const services = {
 		const result = await db.insert(userTokensTable).values(data);
 		return result;
 	},
-	getPermissionsByRoleId: async (roleId: number) => {
-		const result = await db.execute(
-			sql`
-			SELECT array_agg(${permissions.name}) AS permissions
-			FROM ${role_permissions}
-			LEFT JOIN ${permissions}
-			ON ${role_permissions.permissionId} = ${permissions.id}
-			WHERE ${role_permissions.roleId} = ${roleId}
-		`
-		);
-		return result.rows[0]?.permissions ?? [];
+	getPermissionsByRoleId: async (user: User) => {
+		const rolePerms = await db
+			.select({
+				permission: permissions.name
+			})
+			.from(role_permissions)
+			.leftJoin(
+				permissions,
+				eq(role_permissions.permissionId, permissions.id)
+			)
+			.where(eq(role_permissions.roleId, user.roleId as number));
+
+		const userPerms = await db
+			.select({
+				permission: permissions.name
+			})
+			.from(userPermissions)
+			.leftJoin(
+				permissions,
+				eq(permissions.id, userPermissions.permissionId)
+			)
+			.where(eq(userPermissions.userId, user.id as number));
+		const _rolePermissions = rolePerms.map((rp) => rp.permission);
+		const _userPermissions = userPerms.map((p) => p.permission);
+		const uniquePermissionsSet = [
+			...new Set([..._rolePermissions, ..._userPermissions])
+		];
+
+		return uniquePermissionsSet;
 	}
 };

@@ -9,6 +9,7 @@ import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { User } from "../user/service";
+import redis from "@/lib/redis";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
@@ -23,14 +24,19 @@ export const services = {
 				if (!user) {
 					throwError(info?.message || "Invalid credentials", 401);
 				}
-				const permissions = await userServies.getPermissionsByRoleId(
-					user.roleId as number
+				const permissions = await userServies.getPermissionsByRoleId(user);
+				await redis.set(
+					`user:${user.id}`,
+					JSON.stringify(permissions),
+					"EX",
+					60 * 10 // 10min
 				);
-				const userWithPermision = { ...user, permissions };
-				const tokens = generateToken({ user: userWithPermision });
+				const tokens = generateToken({
+					user: { ...user, permissionKey: `user:${user.id}` }
+				});
 				setAuthCookies(res, tokens as TokenOptions);
 				const responseData = {
-					user: userWithPermision,
+					user,
 					...tokens
 				};
 				await userServies.createRefreshUserToken({

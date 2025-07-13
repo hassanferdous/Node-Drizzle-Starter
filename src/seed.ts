@@ -3,7 +3,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { permissions, role_permissions, roles, usersTable } from "./db/schema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-const db = drizzle(process.env.DATABASE_URL!);
+import { config } from "./config";
+const db = drizzle(config.db.uri);
 
 async function seedDefaultRolesAndPermissions() {
 	// 1. Seed roles

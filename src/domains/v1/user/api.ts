@@ -22,7 +22,7 @@ router.post(
 router.get(
 	"/",
 	auth,
-	// authorize(["create_user"]),
+	authorize(["create_post"]),
 	async (req: Request, res: Response) => {
 		const key = "users:list";
 		const cached = await redis.get(key);
@@ -36,7 +36,7 @@ router.get(
 		}
 
 		const data = await services.getAll();
-		await redis.set(key, JSON.stringify(data), "NX");
+		redis.set("mykey", JSON.stringify(data), "EX", 5);
 		sendSuccess(res, data, 200, "Successfully fetched all user!");
 	}
 );

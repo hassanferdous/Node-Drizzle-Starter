@@ -18,7 +18,7 @@ COPY . .
 # RUN npm run build
 
 # Expose internal port (just one number, not a range like 8000:8000)
-EXPOSE 8000
+# EXPOSE 8000
 
 # Default command (overridden by docker-compose if needed)
 CMD ["npm", "run", "dev"]
