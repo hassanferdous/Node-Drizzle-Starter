@@ -1,5 +1,6 @@
 import { db } from "@/config/db";
 import {
+	deniedPermissions,
 	permissions,
 	role_permissions,
 	userPermissions,
@@ -109,13 +110,28 @@ export const services = {
 				permissions,
 				eq(permissions.id, userPermissions.permissionId)
 			)
-			.where(eq(userPermissions.userId, user.id as number));
+			.where(eq(userPermissions.userId, user.id));
+		const deniedPerms = await db
+			.select({
+				permission: permissions.name
+			})
+			.from(permissions)
+			.leftJoin(
+				deniedPermissions,
+				eq(permissions.id, deniedPermissions.permissionId)
+			)
+			.where(eq(deniedPermissions.userId, user.id));
 		const _rolePermissions = rolePerms.map((rp) => rp.permission);
 		const _userPermissions = userPerms.map((p) => p.permission);
+		const _deniedPermissions = deniedPerms.map((p) => p.permission);
+		const deniedSet = new Set(_deniedPermissions);
 		const uniquePermissionsSet = [
 			...new Set([..._rolePermissions, ..._userPermissions])
 		];
+		const allowedPermissions = uniquePermissionsSet.filter(
+			(perm) => !deniedSet.has(perm as string)
+		);
 
-		return uniquePermissionsSet;
+		return allowedPermissions;
 	}
 };

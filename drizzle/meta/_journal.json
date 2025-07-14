@@ -15,6 +15,13 @@
       "when": 1752342246180,
       "tag": "0001_friendly_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752487515119,
+      "tag": "0002_yummy_goblin_queen",
+      "breakpoints": true
     }
   ]
 }
