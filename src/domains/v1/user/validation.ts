@@ -9,3 +9,12 @@ export const createSchema = z.object({
 		.min(0, "Age must be non-negative"),
 	email: z.string().email("Invalid email format").max(255, "Email is too long")
 });
+
+export const userPermissionSchema = z.object({
+	permission: z.union([
+		z
+			.array(z.number({ message: "Id is required" }))
+			.min(1, "At least 1 item required"),
+		z.number({ message: "Id is required" })
+	])
+});

@@ -4,6 +4,7 @@ import { throwError } from "@/utils/error";
 import { generateToken, verifyToken } from "@/utils/jwt";
 import { sendSuccess } from "@/utils/response";
 import { services as userServies } from "@domains/v1/user/service";
+import { services as permissionServies } from "@domains/v1/permission/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
@@ -26,24 +27,26 @@ export const services = {
 				if (!user) {
 					throwError(info?.message || "Invalid credentials", 401);
 				}
-				const permissions = await userServies.getPermissionsPermissions(
+				const permissions = await permissionServies.getUserPermissions(
 					user
 				);
+				const permissionKey = `user:${user.id}:permission`;
 				await redis.set(
-					`user:${user.id}`,
+					permissionKey,
 					JSON.stringify(permissions),
 					"EX",
 					60 * 10 // 10min
 				);
 				const tokens = generateToken({
-					user: { ...user, permissionKey: `users:${user.id}:permissions` }
+					user: { ...user, permissionKey: permissionKey }
 				});
 				setAuthCookies(res, tokens as TokenOptions);
 				const responseData = {
 					user,
-					...tokens
+					...tokens,
+					permissionKey: permissionKey
 				};
-				await userServies.createRefreshUserToken({
+				await userServies.createUserRefreshToken({
 					userId: user.id,
 					refreshToken: tokens.refresh_token as string
 				});

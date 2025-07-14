@@ -4,6 +4,7 @@ import { sendSuccess } from "@/utils/response";
 import authRoutes from "@domains/v1/auth";
 import usersRoutes from "@domains/v1/user";
 import rolesRoutes from "@domains/v1/role";
+import permissionsRoutes from "@domains/v1/permission";
 import { sql } from "drizzle-orm";
 import { Router } from "express";
 const router = Router();
@@ -48,6 +49,7 @@ function defineRoutes(expressRouter: Router) {
 	authRoutes(expressRouter);
 	usersRoutes(expressRouter);
 	rolesRoutes(expressRouter);
+	permissionsRoutes(expressRouter);
 
 	// default routers
 	defaultRoutes(expressRouter);

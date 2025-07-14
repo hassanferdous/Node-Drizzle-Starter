@@ -73,8 +73,8 @@ fs.writeFileSync(
 import { ${collectionName}sTable } from "@/db/schema";
 import { eq, InferInsertModel, InferSelectModel } from "drizzle-orm";
 
-type ${capitalized} = InferSelectModel<typeof ${collectionName}sTable>;
-type New${capitalized} = InferInsertModel<typeof ${collectionName}sTable>;
+export type ${capitalized} = InferSelectModel<typeof ${collectionName}sTable>;
+export type New${capitalized} = InferInsertModel<typeof ${collectionName}sTable>;
 
 export const services = {
 	create: async (data: New${capitalized}): Promise<${capitalized}> => {

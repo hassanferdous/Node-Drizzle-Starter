@@ -10,5 +10,5 @@ export const createSchema = z.object({
 export const addPermissionSchema = z.object({
 	permissions: z
 		.array(z.number({ message: "Permission is required" }))
-		.min(1, "At lest permission")
+		.min(1, "At lest one permission")
 });
