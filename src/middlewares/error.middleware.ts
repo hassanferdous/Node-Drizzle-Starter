@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { AppError } from "../utils/error";
+import { AppError, throwError } from "../utils/error";
 
 export const errorHandler = (
 	err: unknown,
@@ -9,7 +9,7 @@ export const errorHandler = (
 ) => {
 	if (err instanceof AppError) {
 		return res.status(err.statusCode).json({
-			data: null,
+			data: err.initialData,
 			isError: true,
 			isSuccess: false,
 			message: err.message,
@@ -25,4 +25,16 @@ export const errorHandler = (
 		message: "Internal Server Error",
 		status: 500
 	});
+};
+
+export const entityParseHandler = (
+	err: any,
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	if (err.type === "entity.parse.failed") {
+		return throwError("Invalid JSON payload", 400, {});
+	}
+	next(err);
 };
