@@ -9,7 +9,7 @@ export default function authorize(requiredPermissions: Permisions) {
 		const permissions = await getCachedOrLoad(
 			user.permissionKey,
 			async () => {
-				return await userServices.getPermissionsByRoleId(user);
+				return await userServices.getPermissionsPermissions(user);
 			},
 			60 * 10
 		);

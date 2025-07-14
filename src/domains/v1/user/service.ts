@@ -88,7 +88,7 @@ export const services = {
 		const result = await db.insert(userTokensTable).values(data);
 		return result;
 	},
-	getPermissionsByRoleId: async (user: User) => {
+	getPermissionsPermissions: async (user: User) => {
 		const rolePerms = await db
 			.select({
 				permission: permissions.name

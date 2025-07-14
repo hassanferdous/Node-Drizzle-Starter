@@ -24,7 +24,9 @@ export const services = {
 				if (!user) {
 					throwError(info?.message || "Invalid credentials", 401);
 				}
-				const permissions = await userServies.getPermissionsByRoleId(user);
+				const permissions = await userServies.getPermissionsPermissions(
+					user
+				);
 				await redis.set(
 					`user:${user.id}`,
 					JSON.stringify(permissions),

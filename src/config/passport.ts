@@ -7,7 +7,6 @@ passport.use(
 	new LocalStrategy(
 		{ usernameField: "email", passwordField: "password" },
 		async function (email, password, cb) {
-			console.log({ email, password });
 			const user = await userServices.getByEmail(email);
 			if (!user) {
 				return cb(null, false, { message: "Incorrect email or password." });
