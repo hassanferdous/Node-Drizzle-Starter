@@ -36,7 +36,7 @@ export const services = {
 					60 * 10 // 10min
 				);
 				const tokens = generateToken({
-					user: { ...user, permissionKey: `user:${user.id}` }
+					user: { ...user, permissionKey: `users:${user.id}:permissions` }
 				});
 				setAuthCookies(res, tokens as TokenOptions);
 				const responseData = {
