@@ -6,7 +6,7 @@ import {
 	text,
 	varchar
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { timestampColumns } from "./common";
 
 export const roles = pgTable("roles", {
 	id: serial().primaryKey(),
@@ -15,7 +15,9 @@ export const roles = pgTable("roles", {
 
 export const permissions = pgTable("permissions", {
 	id: serial().primaryKey(),
-	name: text().notNull().unique()
+	name: text().notNull().unique(),
+	description: text(),
+	...timestampColumns
 });
 
 export const role_permissions = pgTable(
@@ -70,7 +72,8 @@ export const usersTable = pgTable("users", {
 	password: varchar().notNull(),
 	img: varchar({ length: 255 }),
 	age: integer(),
-	roleId: integer("role_id").references(() => roles.id)
+	roleId: integer("role_id").references(() => roles.id),
+	...timestampColumns
 });
 
 export const userTokensTable = pgTable("user_tokens", {
@@ -79,7 +82,7 @@ export const userTokensTable = pgTable("user_tokens", {
 		.notNull()
 		.references(() => usersTable.id),
 	refreshToken: varchar({ length: 512 }).notNull().unique(),
-	createdAt: varchar({ length: 50 }).default(sql`CURRENT_TIMESTAMP`),
 	userAgent: varchar({ length: 255 }),
-	ipAddress: varchar({ length: 50 })
+	ipAddress: varchar({ length: 50 }),
+	...timestampColumns
 });

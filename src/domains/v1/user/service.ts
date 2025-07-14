@@ -29,7 +29,9 @@ export const services = {
 				email: usersTable.email,
 				age: usersTable.age,
 				img: usersTable.img,
-				roleId: usersTable.roleId
+				roleId: usersTable.roleId,
+				createdAt: usersTable.createdAt,
+				updatedAt: usersTable.updatedAt
 			});
 		return created;
 	},

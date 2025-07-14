@@ -27,10 +27,19 @@ async function seedDefaultRolesAndPermissions() {
 
 	// 2. Seed permissions
 	const permissionNames = [
-		"create_user",
-		"delete_user",
-		"view_user",
-		"manage_roles"
+		"user:manage",
+		"user:create",
+		"user:delete",
+		"user:update",
+		"user:read",
+		"user:read:self",
+		"user:udpate:self",
+		"post:create",
+		"post:read",
+		"post:delete",
+		"post:update",
+		"post:update:self",
+		"post:delete:self"
 	];
 
 	const existingPermissions = await db.select().from(permissions);
@@ -69,7 +78,7 @@ async function seedDefaultRolesAndPermissions() {
 	}
 
 	// 4. Seed default admin user
-	const defaultAdminEmail = "admin@example.com";
+	const defaultAdminEmail = "admin@gmail.com";
 	const existingAdmin = await db
 		.select()
 		.from(usersTable)
