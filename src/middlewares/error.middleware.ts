@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { AppError, throwError } from "../utils/error";
 
 export const errorHandler = (
-	err: unknown,
+	err: any,
 	_req: Request,
 	res: Response,
 	_next: NextFunction
@@ -14,6 +14,17 @@ export const errorHandler = (
 			isSuccess: false,
 			message: err.message,
 			status: err.statusCode
+		});
+	}
+
+	// Check for PostgreSQL unique constraint violation
+	if (err?.cause?.code === "23505") {
+		return res.status(409).json({
+			isSuccess: false,
+			isError: true,
+			message: "Duplicate entry violates unique constraint.",
+			status: 409,
+			data: { constraint: err?.cause?.constraint }
 		});
 	}
 
@@ -36,5 +47,6 @@ export const entityParseHandler = (
 	if (err.type === "entity.parse.failed") {
 		return throwError("Invalid JSON payload", 400, {});
 	}
+
 	next(err);
 };

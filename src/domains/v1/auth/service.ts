@@ -1,4 +1,4 @@
-import { userTokensTable } from "@/db/schema";
+import { usersTable, userTokensTable } from "@/db/schema";
 import { setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { throwError } from "@/utils/error";
 import { generateToken, verifyToken } from "@/utils/jwt";
@@ -10,6 +10,7 @@ import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { User } from "../user/service";
 import redis from "@/lib/redis";
+import { db } from "@/config/db";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
@@ -52,6 +53,20 @@ export const services = {
 		)(req, res, next);
 	},
 
+	// Register new user
+	register: async (req: Request, res: Response) => {
+		const result = await db.insert(usersTable).values(req.body).returning({
+			id: usersTable.id,
+			email: usersTable.email,
+			name: usersTable.name,
+			img: usersTable.img,
+			roleId: usersTable.roleId
+		});
+
+		return sendSuccess(res, result);
+	},
+
+	// verify refresh token
 	verfifyRefreshToken: async (
 		req: Request,
 		res: Response,

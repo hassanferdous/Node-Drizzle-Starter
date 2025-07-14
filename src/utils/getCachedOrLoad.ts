@@ -11,7 +11,7 @@ async function getCachedOrLoad<T>(
 		return JSON.parse(cached);
 	}
 	const data = await loader();
-	console.log("******* re-cached **********");
+	console.log("******* re-entry **********");
 	await redis.set(key, JSON.stringify(data), "EX", ttl);
 	return data;
 }

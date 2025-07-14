@@ -49,10 +49,10 @@ export const userPermissions = pgTable(
 export const usersTable = pgTable("users", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	name: varchar({ length: 255 }),
-	age: integer(),
 	email: varchar({ length: 255 }).notNull().unique(),
 	password: varchar().notNull(),
 	img: varchar({ length: 255 }),
+	age: integer(),
 	roleId: integer("role_id").references(() => roles.id)
 });
 
