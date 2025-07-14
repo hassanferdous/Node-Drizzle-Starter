@@ -1,0 +1,15 @@
+import redis from "@/lib/redis";
+
+async function getCachedOrLoad<T>(
+	key: string,
+	loader: () => Promise<T>,
+	ttl = 3600
+): Promise<T> {
+	const cached = await redis.get(key);
+	if (cached) return JSON.parse(cached);
+	const data = await loader();
+	await redis.set(key, JSON.stringify(data), "EX", ttl);
+	return data;
+}
+
+export default getCachedOrLoad;
