@@ -23,8 +23,12 @@ export const permissions = pgTable("permissions", {
 export const role_permissions = pgTable(
 	"role_permissions",
 	{
-		roleId: integer("role_id").references(() => roles.id),
-		permissionId: integer("permission_id").references(() => permissions.id)
+		roleId: integer("role_id").references(() => roles.id, {
+			onDelete: "cascade"
+		}),
+		permissionId: integer("permission_id").references(() => permissions.id, {
+			onDelete: "cascade"
+		})
 	},
 	(table) => ({
 		pk: primaryKey({ columns: [table.roleId, table.permissionId] })
@@ -36,10 +40,10 @@ export const userPermissions = pgTable(
 	{
 		userId: integer("user_id")
 			.notNull()
-			.references(() => usersTable.id),
+			.references(() => usersTable.id, { onDelete: "cascade" }),
 		permissionId: integer("permission_id")
 			.notNull()
-			.references(() => permissions.id)
+			.references(() => permissions.id, { onDelete: "cascade" })
 	},
 	(table) => ({
 		pk: primaryKey({
@@ -72,7 +76,9 @@ export const usersTable = pgTable("users", {
 	password: varchar().notNull(),
 	img: varchar({ length: 255 }),
 	age: integer(),
-	roleId: integer("role_id").references(() => roles.id),
+	roleId: integer("role_id").references(() => roles.id, {
+		onDelete: "set null"
+	}),
 	...timestampColumns
 });
 

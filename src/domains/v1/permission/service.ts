@@ -72,7 +72,7 @@ export const services = {
 	},
 
 	// get logged in user's permission
-	getUserPermissions: async (user: User) => {
+	getUserPermissions: async (user: { roleId: number | null; id: number }) => {
 		const rolePerms = await db
 			.select({
 				permission: permissions.name
@@ -104,9 +104,9 @@ export const services = {
 				eq(permissions.id, deniedPermissions.permissionId)
 			)
 			.where(eq(deniedPermissions.userId, user.id));
-		const _rolePermissions = rolePerms.map((rp) => rp.permission);
-		const _userPermissions = userPerms.map((p) => p.permission);
-		const _deniedPermissions = deniedPerms.map((p) => p.permission);
+		const _rolePermissions = rolePerms.map((rp) => rp.permission as string);
+		const _userPermissions = userPerms.map((p) => p.permission as string);
+		const _deniedPermissions = deniedPerms.map((p) => p.permission as string);
 		const deniedSet = new Set(_deniedPermissions);
 		const uniquePermissionsSet = [
 			...new Set([..._rolePermissions, ..._userPermissions])

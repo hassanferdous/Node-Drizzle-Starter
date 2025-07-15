@@ -65,7 +65,11 @@ export const services = {
 	},
 	getPermissions: async (id: number): Promise<any[]> => {
 		return await db
-			.select({ roleId: role_permissions.roleId, name: permissions.name })
+			.select({
+				roleId: role_permissions.roleId,
+				name: permissions.name,
+				permissionId: permissions.id
+			})
 			.from(role_permissions)
 			.where(eq(role_permissions.roleId, id))
 			.leftJoin(
@@ -74,14 +78,15 @@ export const services = {
 			);
 	},
 	removePermissions: async (id: number, permissions: number[]) => {
-		await db
+		return await db
 			.delete(role_permissions)
 			.where(
 				and(
 					eq(role_permissions.roleId, id),
 					inArray(role_permissions.permissionId, permissions)
 				)
-			);
+			)
+			.returning();
 	},
 	removeAllPermissions: async (id: number) => {
 		await db.delete(role_permissions).where(eq(role_permissions.roleId, id));

@@ -10,6 +10,25 @@ export const createSchema = z.object({
 	email: z.string().email("Invalid email format").max(255, "Email is too long")
 });
 
+export const updateSchema = z.object({
+	name: z
+		.string()
+		.min(1, "Name is required")
+		.max(255, "Name is too long")
+		.optional(),
+	age: z
+		.number()
+		.int("Age must be an integer")
+		.min(0, "Age must be non-negative")
+		.optional(),
+	email: z
+		.string()
+		.email("Invalid email format")
+		.max(255, "Email is too long")
+		.optional(),
+	roleId: z.number().optional()
+});
+
 export const userPermissionSchema = z.object({
 	permission: z.union([
 		z
