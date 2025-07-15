@@ -4,7 +4,7 @@ import { sendSuccess } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { services, User } from "./service";
 import validate from "@/middlewares/validate.middleware";
-import { updateSchema, userPermissionSchema } from "./validation";
+import { createSchema, updateSchema, userPermissionSchema } from "./validation";
 import { idParamSchema } from "@/lib/common-zod-schema";
 
 const router = express.Router();
@@ -14,6 +14,7 @@ router.post(
 	"/",
 	auth,
 	authorize(["user:manage", "user:create"]),
+	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
 		const data = await services.create(req.body);
 		sendSuccess(res, data, 201, "Successfully created new user!");
@@ -36,6 +37,7 @@ router.get(
 	"/:id",
 	auth,
 	authorize(["user:manage", "user:read"]),
+	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await services.getById(id);
@@ -48,7 +50,7 @@ router.put(
 	"/:id",
 	auth,
 	authorize(["user:manage", "user:update"]),
-	validate({ body: updateSchema }),
+	validate({ body: updateSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await services.update(id, req.body);
@@ -61,6 +63,7 @@ router.delete(
 	"/:id",
 	auth,
 	authorize(["user:manage", "user:delete"]),
+	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await services.delete(id);
@@ -69,11 +72,16 @@ router.delete(
 );
 
 // User role permission
-router.get("/:id/role-permissions", async (req: Request, res: Response) => {
-	const id = +req.params.id;
-	const data = await services.getUserRolePermissions(id);
-	sendSuccess(res, data, 200, "Successfully fetched user!");
-});
+router.get(
+	"/:id/role-permissions",
+	authorize(["permission:manage"]),
+	validate({ params: idParamSchema }),
+	async (req: Request, res: Response) => {
+		const id = +req.params.id;
+		const data = await services.getUserRolePermissions(id);
+		sendSuccess(res, data, 200, "Successfully fetched user!");
+	}
+);
 
 // User additional permissions
 router.post(
@@ -94,6 +102,7 @@ router.get(
 	"/:id/additional-permissions",
 	auth,
 	authorize(["permission:manage"]),
+	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await services.getAdditionalPermission(id);
@@ -131,6 +140,7 @@ router.get(
 	"/:id/denied-permissions",
 	auth,
 	authorize(["permission:manage"]),
+	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await services.getDeniedPermission(id);

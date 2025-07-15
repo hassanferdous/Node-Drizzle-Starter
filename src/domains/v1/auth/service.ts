@@ -17,6 +17,31 @@ import { hashedPassword } from "@/utils/password-hash";
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
+async function generateAccessToken(user: User) {
+	const permissions = await permissionServies.getUserPermissions(user);
+	const permissionKey = `user:${user.id}:permission`;
+	await redis.set(
+		permissionKey,
+		JSON.stringify(permissions),
+		"EX",
+		60 * 10 // 10min
+	);
+	const tokens = generateToken({
+		user: { ...user, permissionKey: permissionKey }
+	});
+	const data = {
+		user,
+		...tokens,
+		permissionKey: permissionKey
+	};
+	await userServies.createUserRefreshToken({
+		userId: user.id,
+		refreshToken: tokens.refresh_token as string
+	});
+
+	return { data, tokens: tokens as TokenOptions };
+}
+
 export const services = {
 	credentialLogin: (req: Request, res: Response, next: NextFunction) => {
 		passport.authenticate(
@@ -27,32 +52,10 @@ export const services = {
 				if (!user) {
 					throwError(info?.message || "Invalid credentials", 401);
 				}
-				const permissions = await permissionServies.getUserPermissions(
-					user
-				);
-				const permissionKey = `user:${user.id}:permission`;
-				await redis.set(
-					permissionKey,
-					JSON.stringify(permissions),
-					"EX",
-					60 * 10 // 10min
-				);
-				const tokens = generateToken({
-					user: { ...user, permissionKey: permissionKey }
-				});
+				const { data, tokens } = await generateAccessToken(user);
 				setAuthCookies(res, tokens as TokenOptions);
-				const responseData = {
-					user,
-					...tokens,
-					permissionKey: permissionKey
-				};
-				await userServies.createUserRefreshToken({
-					userId: user.id,
-					refreshToken: tokens.refresh_token as string
-				});
-
 				// Success — you can return user data or generate JWT
-				return sendSuccess(res, responseData, 200, "Login successful");
+				return sendSuccess(res, data, 200, "Login successful");
 			}
 		)(req, res, next);
 	},
@@ -72,6 +75,21 @@ export const services = {
 			});
 
 		return sendSuccess(res, result);
+	},
+
+	// Google
+	callback_google: async (req: Request, res: Response, next: NextFunction) => {
+		passport.authenticate(
+			"google",
+			{ session: false },
+			async (err, user, info) => {
+				if (err) return next(err);
+				if (!user) return res.redirect("/login?error=OAuthFailed");
+				const { data, tokens } = await generateAccessToken(user);
+				setAuthCookies(res, tokens as TokenOptions);
+				return sendSuccess(res, data, 200, "Login successful");
+			}
+		)(req, res, next);
 	},
 
 	// verify refresh token

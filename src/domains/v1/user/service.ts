@@ -61,7 +61,7 @@ const deleteUserPermissions = async (
 };
 
 export const services = {
-	create: async (data: NewUser): Promise<User> => {
+	create: async (data: NewUser): Promise<Partial<User>> => {
 		const hashedPassword = await bcrypt.hash(
 			"test1234",
 			Number(process.env.HASH_SALT)
@@ -105,7 +105,13 @@ export const services = {
 
 	getByEmail: async (email: string) => {
 		const result = await db
-			.select()
+			.select({
+				name: usersTable.name,
+				email: usersTable.email,
+				id: usersTable.id,
+				roleId: usersTable.roleId,
+				provider: usersTable.provider
+			})
 			.from(usersTable)
 			.where(eq(usersTable.email, email));
 		return result[0] ?? null;

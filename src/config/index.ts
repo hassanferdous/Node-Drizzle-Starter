@@ -15,7 +15,9 @@ export const config = {
 		jwtAccessTokenSecret: env.JWT_ACCESSTOKEN_SECRET,
 		jwtRefreshTokenSecret: env.JWT_REFRESHTOKEN_SECRET,
 		accessTokenDuration: env.ACCESSTOKEN_DURATION,
-		refreshTokenDuration: env.REFRESHTOKEN_DURATION
+		refreshTokenDuration: env.REFRESHTOKEN_DURATION,
+		google_client_id: env.AUTH_GOOGLE_CLIENT_ID,
+		google_client_secret: env.AUTH_GOOGLE_CLIENT_SECRET
 	},
 	redis: {
 		host: env.REDIS_HOST,

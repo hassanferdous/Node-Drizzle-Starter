@@ -79,6 +79,7 @@ export const usersTable = pgTable("users", {
 	roleId: integer("role_id").references(() => roles.id, {
 		onDelete: "set null"
 	}),
+	provider: varchar().notNull().default("credential"),
 	...timestampColumns
 });
 

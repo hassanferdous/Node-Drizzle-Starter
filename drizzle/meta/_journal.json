@@ -43,6 +43,13 @@
       "when": 1752569474948,
       "tag": "0005_wild_mysterio",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1752591519399,
+      "tag": "0006_misty_patch",
+      "breakpoints": true
     }
   ]
 }
