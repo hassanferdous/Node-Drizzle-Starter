@@ -24,3 +24,10 @@ export const registerSchema = z.object({
 		.min(8, "Atlest 8 characters")
 		.nonempty()
 });
+
+export const exchageSchema = z.object({
+	code: z
+		.string({ message: "Missing code" })
+		.uuid("Invalid code")
+		.nonempty("Missing code")
+});

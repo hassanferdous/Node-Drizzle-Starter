@@ -13,10 +13,12 @@ import { User } from "../user/service";
 import redis from "@/lib/redis";
 import { db } from "@/config/db";
 import { hashedPassword } from "@/utils/password-hash";
+import { v4 as uuidv4 } from "uuid";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
+// Generate access token
 async function generateAccessToken(user: User) {
 	const permissions = await PermissionServices.getUserPermissions(user);
 	const permissionKey = `user:${user.id}:permission`;
@@ -42,8 +44,22 @@ async function generateAccessToken(user: User) {
 	return { data, tokens: tokens as TokenOptions };
 }
 
+// Generate one time code and return redirect url
+async function generateOneTimeCode(user: User) {
+	const { data, tokens } = await generateAccessToken(user);
+	const oneTimeCode = uuidv4();
+	const cacheKey = `auth:code:${oneTimeCode}`;
+	await redis.set(
+		cacheKey,
+		JSON.stringify({ ...tokens, userId: user.id }),
+		"EX",
+		60 * 2 // Expires in 2 minutes
+	);
+	return { data, tokens, redirectUrl: `/login-success?code=${oneTimeCode}` };
+}
+
 export const AuthServices = {
-	credentialLogin: (req: Request, res: Response, next: NextFunction) => {
+	callback_credential: (req: Request, res: Response, next: NextFunction) => {
 		passport.authenticate(
 			"local",
 			{ session: false },
@@ -60,39 +76,20 @@ export const AuthServices = {
 		)(req, res, next);
 	},
 
-	// Register new user
-	register: async (req: Request, res: Response) => {
-		const hash = await hashedPassword(req.body.password);
-		const result = await db
-			.insert(usersTable)
-			.values({ ...req.body, password: hash })
-			.returning({
-				id: usersTable.id,
-				email: usersTable.email,
-				name: usersTable.name,
-				img: usersTable.img,
-				roleId: usersTable.roleId
-			});
-
-		return sendSuccess(res, result);
-	},
-
-	// Google
 	callback_google: async (req: Request, res: Response, next: NextFunction) => {
 		passport.authenticate(
 			"google",
 			{ session: false },
-			async (err, user, info) => {
+			async (err, user: User, info) => {
 				if (err) return next(err);
 				if (!user) return res.redirect("/login?error=OAuthFailed");
-				const { data, tokens } = await generateAccessToken(user);
+				const { tokens, redirectUrl } = await generateOneTimeCode(user);
 				setAuthCookies(res, tokens as TokenOptions);
-				return sendSuccess(res, data, 200, "Login successful");
+				return res.redirect(redirectUrl);
 			}
 		)(req, res, next);
 	},
 
-	// verify refresh token
 	verfifyRefreshToken: async (
 		req: Request,
 		res: Response,
@@ -127,5 +124,29 @@ export const AuthServices = {
 		} catch (error) {
 			throwError("Invalid Token", 401);
 		}
+	},
+
+	exchangeToken: async (req: Request, res: Response) => {
+		const code = req.query.code;
+		const cached = await redis.get(`auth:code:${code}`);
+		if (!cached) return throwError("Invalid or expired code", 400);
+		await redis.del(`auth:code:${code}`);
+		return sendSuccess(res, JSON.parse(cached), 200);
+	},
+
+	register: async (req: Request, res: Response) => {
+		const hash = await hashedPassword(req.body.password);
+		const result = await db
+			.insert(usersTable)
+			.values({ ...req.body, password: hash })
+			.returning({
+				id: usersTable.id,
+				email: usersTable.email,
+				name: usersTable.name,
+				img: usersTable.img,
+				roleId: usersTable.roleId
+			});
+
+		return sendSuccess(res, result);
 	}
 };

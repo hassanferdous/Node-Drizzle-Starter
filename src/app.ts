@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import passport from "passport";
@@ -14,6 +14,7 @@ import { safeJsonParser } from "@middlewares/safe-parse.middleware";
 
 /******** Passport strategies ********/
 import "@domains/v1/auth/passport";
+import path from "node:path";
 
 /******** Initialize Express App ********/
 const app = express();
@@ -25,8 +26,20 @@ app.use(safeJsonParser);
 app.use(morgan("dev"));
 app.use(passport.initialize());
 
+/******** Template engine ********/
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname) + "/views");
+
 /******** Mount app router ********/
 app.use("/api/v1", router);
+
+// success page after successfully login using oAuth provides
+app.get("/", (req: Request, res: Response) => {
+	res.render("index", { message: "Login success" });
+});
+app.get("/login-success", (req: Request, res: Response) => {
+	res.render("login-success", { message: "Login success" });
+});
 
 /******** Global entity parse error handler ********/
 app.use(entityParseHandler);
