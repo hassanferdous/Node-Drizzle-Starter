@@ -6,12 +6,11 @@ import {
 	userPermissions
 } from "@/db/schema";
 import { eq, inArray, InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { User } from "../user/service";
 
 export type Permission = InferSelectModel<typeof permissions>;
 export type NewPermission = InferInsertModel<typeof permissions>;
 
-export const services = {
+export const PermissionServices = {
 	create: async (
 		data: NewPermission | NewPermission[]
 	): Promise<Permission | Permission[]> => {

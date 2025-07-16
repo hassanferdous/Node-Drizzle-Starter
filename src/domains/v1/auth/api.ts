@@ -1,9 +1,8 @@
 import validate from "@/middlewares/validate.middleware";
 import express from "express";
-import { services } from "./service";
+import { AuthServices } from "./service";
 import { loginSchema, registerSchema } from "./validation";
 import passport from "passport";
-import { sendSuccess } from "@/utils/response";
 
 const router = express.Router();
 
@@ -11,10 +10,14 @@ const router = express.Router();
 router.post(
 	"/credential",
 	validate({ body: loginSchema }),
-	services.credentialLogin
+	AuthServices.credentialLogin
 );
 // Register
-router.post("/register", validate({ body: registerSchema }), services.register);
+router.post(
+	"/register",
+	validate({ body: registerSchema }),
+	AuthServices.register
+);
 
 // Google
 router.get(
@@ -25,9 +28,9 @@ router.get(
 	})
 );
 
-router.get("/google/callback", services.callback_google);
+router.get("/google/callback", AuthServices.callback_google);
 
 // refresh token
-router.post("/refresh-token", services.verfifyRefreshToken);
+router.post("/refresh-token", AuthServices.verfifyRefreshToken);
 
 export default router;

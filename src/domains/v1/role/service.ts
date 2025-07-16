@@ -13,7 +13,7 @@ type NewRole = InferInsertModel<typeof roles>;
 type Role_Permission = InferInsertModel<typeof role_permissions>;
 type New_Role_Permission = InferInsertModel<typeof role_permissions>;
 
-export const services = {
+export const RoleServices = {
 	create: async (data: NewRole): Promise<Role> => {
 		const [created] = await db.insert(roles).values(data).returning();
 		return created;

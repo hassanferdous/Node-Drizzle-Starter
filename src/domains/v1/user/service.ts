@@ -17,7 +17,7 @@ import {
 	InferSelectModel
 } from "drizzle-orm";
 import { NewRefreshToken } from "../auth/service";
-import { services as permissionServices } from "@domains/v1/permission/service";
+import { PermissionServices } from "@domains/v1/permission/service";
 
 export type User = Omit<InferSelectModel<typeof usersTable>, "password">;
 export type NewUser = InferInsertModel<typeof usersTable>;
@@ -60,7 +60,7 @@ const deleteUserPermissions = async (
 		.returning();
 };
 
-export const services = {
+export const UserServices = {
 	create: async (data: NewUser): Promise<Partial<User>> => {
 		const hashedPassword = await bcrypt.hash(
 			"test1234",
@@ -99,18 +99,19 @@ export const services = {
 		const user = result[0] ?? null;
 		if (!user) return user;
 
-		const permissions = await permissionServices.getUserPermissions(user);
+		const permissions = await PermissionServices.getUserPermissions(user);
 		return { ...user, permissions };
 	},
 
-	getByEmail: async (email: string) => {
+	getByEmail: async (email: string, populatePassword: boolean = false) => {
 		const result = await db
 			.select({
 				name: usersTable.name,
 				email: usersTable.email,
 				id: usersTable.id,
 				roleId: usersTable.roleId,
-				provider: usersTable.provider
+				provider: usersTable.provider,
+				...(populatePassword ? { password: usersTable.password } : {})
 			})
 			.from(usersTable)
 			.where(eq(usersTable.email, email));
@@ -174,7 +175,7 @@ export const services = {
 			.then((res) => res[0]);
 
 		if (!user) throwError("User not found");
-		const permissions = permissionServices.getUserPermissions(user);
+		const permissions = PermissionServices.getUserPermissions(user);
 		return permissions;
 	},
 
@@ -202,7 +203,7 @@ export const services = {
 		userId: number,
 		permission: number | number[]
 	) => {
-		const rolePermIds = await services.getUserRolePermissions(userId);
+		const rolePermIds = await UserServices.getUserRolePermissions(userId);
 		const permissionArray = Array.isArray(permission)
 			? permission
 			: [permission];
@@ -239,7 +240,7 @@ export const services = {
 
 	// User's denied deleteUserPermissions(userPermissions, userId, permissions)
 	deniedPermission: async (userId: number, permission: number | number[]) => {
-		const rolePermIds = await services.getUserRolePermissions(userId);
+		const rolePermIds = await UserServices.getUserRolePermissions(userId);
 		const permissionArray = Array.isArray(permission)
 			? permission
 			: [permission];

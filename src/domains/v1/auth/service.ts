@@ -3,8 +3,8 @@ import { setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { throwError } from "@/utils/error";
 import { generateToken, verifyToken } from "@/utils/jwt";
 import { sendSuccess } from "@/utils/response";
-import { services as userServies } from "@domains/v1/user/service";
-import { services as permissionServies } from "@domains/v1/permission/service";
+import { UserServices } from "@domains/v1/user/service";
+import { PermissionServices } from "@domains/v1/permission/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
@@ -18,7 +18,7 @@ export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
 async function generateAccessToken(user: User) {
-	const permissions = await permissionServies.getUserPermissions(user);
+	const permissions = await PermissionServices.getUserPermissions(user);
 	const permissionKey = `user:${user.id}:permission`;
 	await redis.set(
 		permissionKey,
@@ -34,7 +34,7 @@ async function generateAccessToken(user: User) {
 		...tokens,
 		permissionKey: permissionKey
 	};
-	await userServies.createUserRefreshToken({
+	await UserServices.createUserRefreshToken({
 		userId: user.id,
 		refreshToken: tokens.refresh_token as string
 	});
@@ -42,7 +42,7 @@ async function generateAccessToken(user: User) {
 	return { data, tokens: tokens as TokenOptions };
 }
 
-export const services = {
+export const AuthServices = {
 	credentialLogin: (req: Request, res: Response, next: NextFunction) => {
 		passport.authenticate(
 			"local",
@@ -110,7 +110,7 @@ export const services = {
 			};
 			if (decodeded.exp! > Date.now())
 				return throwError("Invalid Token", 401);
-			const storedToken = await userServies.getRefreshUserToken(
+			const storedToken = await UserServices.getRefreshUserToken(
 				decodeded.user.id
 			);
 			if (!storedToken) return throwError("Refresh token not found", 403);

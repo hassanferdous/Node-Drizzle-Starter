@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { services } from "./service";
+import { RoleServices } from "./service";
 import { sendSuccess } from "@/utils/response";
 import auth from "@/middlewares/auth.middleware";
 import authorize from "@/middlewares/authorize.middleware";
@@ -16,7 +16,7 @@ router.post(
 	authorize(["role:manage"]),
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
-		const data = await services.create(req.body);
+		const data = await RoleServices.create(req.body);
 		sendSuccess(res, data, 201, "Successfully created new role!");
 	}
 );
@@ -27,7 +27,7 @@ router.get(
 	auth,
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
-		const data = await services.getAll();
+		const data = await RoleServices.getAll();
 		sendSuccess(res, data, 200, "Successfully fetched all role!");
 	}
 );
@@ -39,7 +39,7 @@ router.get(
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await services.getById(id);
+		const data = await RoleServices.getById(id);
 		sendSuccess(res, data, 200, "Successfully fetched role!");
 	}
 );
@@ -51,8 +51,8 @@ router.put(
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		await services.update(id, req.body);
-		const data = await services.getById(id);
+		await RoleServices.update(id, req.body);
+		const data = await RoleServices.getById(id);
 		sendSuccess(res, data, 200, "Successfully updated role!");
 	}
 );
@@ -64,7 +64,7 @@ router.delete(
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await services.delete(id);
+		const data = await RoleServices.delete(id);
 		sendSuccess(res, data, 200, "Successfully deleted role!");
 	}
 );
@@ -78,7 +78,7 @@ router.post(
 	validate({ body: addPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await services.addPermissions(id, req.body.permissions);
+		const data = await RoleServices.addPermissions(id, req.body.permissions);
 		sendSuccess(res, data, 200, "Permissions assigned successfully.");
 	}
 );
@@ -91,7 +91,7 @@ router.get(
 	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await services.getPermissions(id);
+		const data = await RoleServices.getPermissions(id);
 		sendSuccess(res, data, 200, "Permissions fetched successfully.");
 	}
 );
@@ -104,7 +104,7 @@ router.delete(
 	validate({ body: addPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		await services.removePermissions(id, req.body.permissions);
+		await RoleServices.removePermissions(id, req.body.permissions);
 		sendSuccess(res, {}, 200, "Permissions removed successfully.");
 	}
 );
@@ -117,7 +117,7 @@ router.delete(
 	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		await services.removeAllPermissions(id);
+		await RoleServices.removeAllPermissions(id);
 		sendSuccess(res, {}, 200, "All permissions removed successfully.");
 	}
 );

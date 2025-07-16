@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { services } from "./service";
+import { PermissionServices } from "./service";
 import { sendSuccess } from "@/utils/response";
 import auth from "@/middlewares/auth.middleware";
 import validate from "@/middlewares/validate.middleware";
@@ -15,7 +15,7 @@ router.post(
 	authorize(["permission:manage", "permission:create"]),
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
-		const data = await services.create(req.body.permissions);
+		const data = await PermissionServices.create(req.body.permissions);
 		sendSuccess(res, data, 201, "Successfully created new permission!");
 	}
 );
@@ -26,7 +26,7 @@ router.get(
 	auth,
 	authorize(["permission:manage", "permission:read"]),
 	async (req: Request, res: Response) => {
-		const data = await services.getAll();
+		const data = await PermissionServices.getAll();
 		sendSuccess(res, data, 200, "Successfully fetched all permission!");
 	}
 );
@@ -38,7 +38,7 @@ router.get(
 	authorize(["permission:manage", "permission:read"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await services.getById(id);
+		const data = await PermissionServices.getById(id);
 		sendSuccess(res, data, 200, "Successfully fetched permission!");
 	}
 );
@@ -50,8 +50,8 @@ router.put(
 	authorize(["permission:manage", "permission:update"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		await services.update(id, req.body);
-		const data = await services.getById(id);
+		await PermissionServices.update(id, req.body);
+		const data = await PermissionServices.getById(id);
 		sendSuccess(res, data, 200, "Successfully updated permission!");
 	}
 );
@@ -63,7 +63,7 @@ router.delete(
 	authorize(["permission:manage", "permission:delete"]),
 	validate({ body: multiDeleteSchema }),
 	async (req: Request, res: Response) => {
-		const data = await services.multiDelete(req.body.ids);
+		const data = await PermissionServices.multiDelete(req.body.ids);
 		sendSuccess(res, data, 200, "Successfully deleted permission!");
 	}
 );
@@ -75,7 +75,7 @@ router.delete(
 	authorize(["permission:manage", "permission:delete"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await services.delete(id);
+		const data = await PermissionServices.delete(id);
 		sendSuccess(res, data, 200, "Successfully deleted permission!");
 	}
 );

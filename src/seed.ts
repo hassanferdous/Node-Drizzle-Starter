@@ -8,7 +8,7 @@ const db = drizzle(config.db.uri);
 
 async function seedDefaultRolesAndPermissions() {
 	// 1. Seed roles
-	const roleNames = ["admin", "user"];
+	const roleNames = ["admin", "user", "guest"];
 	const existingRoles = await db.select().from(roles);
 
 	const roleMap: Record<string, number> = {};
@@ -27,6 +27,7 @@ async function seedDefaultRolesAndPermissions() {
 
 	// 2. Seed permissions
 	const permissionNames = [
+		// Users
 		"user:manage",
 		"user:create",
 		"user:delete",
@@ -34,12 +35,29 @@ async function seedDefaultRolesAndPermissions() {
 		"user:read",
 		"user:read:self",
 		"user:udpate:self",
+
+		// Posts
+		"post:manage",
 		"post:create",
 		"post:read",
 		"post:delete",
 		"post:update",
 		"post:update:self",
-		"post:delete:self"
+		"post:delete:self",
+
+		// Roles
+		"role:manage",
+		"role:create",
+		"role:read",
+		"role:update",
+		"role:delete",
+
+		// Permissions
+		"permission:manage",
+		"permission:create",
+		"permission:read",
+		"permission:update",
+		"permission:delete"
 	];
 
 	const existingPermissions = await db.select().from(permissions);

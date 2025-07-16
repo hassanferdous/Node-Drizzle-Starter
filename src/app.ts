@@ -9,10 +9,13 @@ import {
 	entityParseHandler,
 	errorHandler
 } from "@middlewares/error.middleware";
-import "@/config/passport";
 import router from "./routes";
 import { safeJsonParser } from "@middlewares/safe-parse.middleware";
 
+/******** Passport strategies ********/
+import "@domains/v1/auth/passport";
+
+/******** Initialize Express App ********/
 const app = express();
 
 dotenv.config();
@@ -21,12 +24,14 @@ app.use(cookieParser());
 app.use(safeJsonParser);
 app.use(morgan("dev"));
 app.use(passport.initialize());
-// Mount router
+
+/******** Mount app router ********/
 app.use("/api/v1", router);
 
+/******** Global entity parse error handler ********/
 app.use(entityParseHandler);
 
-// global error handler
+/******** Global error handler ********/
 app.use(errorHandler);
 
 export { app };
