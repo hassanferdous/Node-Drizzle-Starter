@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError, throwError } from "../utils/error";
+import { config } from "@/config";
 
 export const errorHandler = (
 	err: any,
@@ -33,7 +34,10 @@ export const errorHandler = (
 		data: null,
 		isError: true,
 		isSuccess: false,
-		message: "Internal Server Error",
+		message:
+			config.app.env === "development"
+				? err.message
+				: "Internal Server Error",
 		status: 500
 	});
 };
