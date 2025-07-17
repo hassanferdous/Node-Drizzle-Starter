@@ -5,6 +5,9 @@ function defaultRoutes(router: Router) {
 	router.get("/", (req: Request, res: Response) => {
 		res.render("index");
 	});
+	router.get("/login", (req: Request, res: Response) => {
+		res.render("login");
+	});
 	router.get("/login-success", (req: Request, res: Response) => {
 		res.render("login-success");
 	});

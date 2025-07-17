@@ -24,6 +24,8 @@ const app = express();
 dotenv.config();
 app.use(cors());
 app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(safeJsonParser);
 app.use(morgan("dev"));
 app.use(passport.initialize());

@@ -84,6 +84,7 @@ export const AuthServices = {
 				if (err) return next(err);
 				if (!user) return res.redirect("/login?error=OAuthFailed");
 				const { tokens, redirectUrl } = await generateOneTimeCode(user);
+				console.log({ tokens });
 				setAuthCookies(res, tokens as TokenOptions);
 				return res.redirect(redirectUrl);
 			}

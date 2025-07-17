@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background: #f4f4f4;
+		}
+
+		.container {
+			max-width: 400px;
+			margin: 60px auto;
+			background: #fff;
+			padding: 32px;
+			border-radius: 8px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		h2 {
+			text-align: center;
+			margin-bottom: 24px;
+		}
+
+		.form-group {
+			margin-bottom: 16px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 6px;
+		}
+
+		input[type="email"],
+		input[type="password"] {
+			width: 100%;
+			padding: 8px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+
+		button,
+		.oauth-btn {
+			width: 100%;
+			padding: 10px;
+			margin-top: 8px;
+			border: none;
+			border-radius: 4px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+
+		.login-btn {
+			background: #007bff;
+			color: #fff;
+		}
+
+		.oauth-btn.google {
+			background: #db4437;
+			color: #fff;
+		}
+
+		.oauth-btn.github {
+			background: #333;
+			color: #fff;
+		}
+
+		.divider {
+			text-align: center;
+			margin: 24px 0;
+			color: #888;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h2>Login</h2>
+		<form action="/api/v1/auth/credential" method="POST">
+			<div class="form-group">
+				<label for="email">Email</label>
+				<input type="email" id="email" name="email" required autocomplete="email">
+			</div>
+			<div class="form-group">
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" required autocomplete="current-password">
+			</div>
+			<button type="submit" class="login-btn">Sign In</button>
+		</form>
+		<div class="divider">or</div>
+		<form action="/api/v1/auth/google" method="GET">
+			<button type="submit" class="oauth-btn google">Sign in with Google</button>
+		</form>
+		<form action="/api/v1/auth/github" method="GET">
+			<button type="submit" class="oauth-btn github">Sign in with GitHub</button>
+		</form>
+	</div>
+</body>
+
+</html>
