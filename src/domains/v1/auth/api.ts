@@ -3,6 +3,7 @@ import express from "express";
 import passport from "passport";
 import { AuthServices } from "./service";
 import { exchageSchema, loginSchema, registerSchema } from "./validation";
+import csrf from "@/middlewares/csrf.middleware";
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ router.get(
 router.get("/google/callback", AuthServices.callback_google);
 
 /******** refresh token  ********/
-router.post("/refresh-token", AuthServices.verfifyRefreshToken);
+router.post("/refresh-token", csrf, AuthServices.verfifyRefreshToken);
 
 /******** Exchange token  ********/
 router.get(

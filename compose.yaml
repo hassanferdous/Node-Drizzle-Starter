@@ -5,7 +5,8 @@ services:
     ports:
       - ${PORT}:${PORT}
     volumes:
-      - .:/app
+      # - .:/app
+      - .:/app:delegated
       - /app/node_modules
 
     environment:

@@ -11,7 +11,6 @@ type ValidationSchemas = {
 
 export default function validate(schemas: ValidationSchemas) {
 	return (req: Request, res: Response, next: NextFunction) => {
-		console.log(req);
 		try {
 			if (schemas.body) {
 				schemas.body.parse(req.body ?? {});

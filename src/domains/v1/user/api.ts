@@ -1,11 +1,12 @@
+import { idParamSchema } from "@/lib/common-zod-schema";
 import auth from "@/middlewares/auth.middleware";
 import authorize from "@/middlewares/authorize.middleware";
+import validate from "@/middlewares/validate.middleware";
 import { sendSuccess } from "@/utils/response";
 import express, { Request, Response } from "express";
-import { UserServices, User } from "./service";
-import validate from "@/middlewares/validate.middleware";
+import { UserServices } from "./service";
 import { createSchema, updateSchema, userPermissionSchema } from "./validation";
-import { idParamSchema } from "@/lib/common-zod-schema";
+import csrf from "@/middlewares/csrf.middleware";
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post(
 	"/",
 	auth,
+	csrf,
 	authorize(["user:manage", "user:create"]),
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
@@ -49,6 +51,7 @@ router.get(
 router.put(
 	"/:id",
 	auth,
+	csrf,
 	authorize(["user:manage", "user:update"]),
 	validate({ body: updateSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -62,6 +65,7 @@ router.put(
 router.delete(
 	"/:id",
 	auth,
+	csrf,
 	authorize(["user:manage", "user:delete"]),
 	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -87,6 +91,7 @@ router.get(
 router.post(
 	"/:id/additional-permissions",
 	auth,
+	csrf,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -112,6 +117,7 @@ router.get(
 router.delete(
 	"/:id/additional-permissions",
 	auth,
+	csrf,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -128,6 +134,7 @@ router.delete(
 router.post(
 	"/:id/denied-permissions",
 	auth,
+	csrf,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -150,6 +157,7 @@ router.get(
 router.delete(
 	"/:id/denied-permissions",
 	auth,
+	csrf,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
