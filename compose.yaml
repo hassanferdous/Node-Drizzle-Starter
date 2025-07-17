@@ -5,9 +5,8 @@ services:
     ports:
       - ${PORT}:${PORT}
     volumes:
-      # - .:/app
-      # - /app/node_modules
-      - .:/app:delegated
+      - .:/app
+      - /app/node_modules
 
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -24,7 +23,7 @@ services:
     depends_on:
       - postgres
       - redis
-    command: npm run dev
+    command: pnpm dev
 
   postgres:
     container_name: drizzle_postgres
