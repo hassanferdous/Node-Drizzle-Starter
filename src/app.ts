@@ -7,10 +7,11 @@ import { safeJsonParser } from "@middlewares/safe-parse.middleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
+import express from "express";
 import morgan from "morgan";
 import passport from "passport";
 import router from "./routes";
+import viewsRouter from "./routes/view-routes";
 
 /******** Passport strategies ********/
 import "@domains/v1/auth/passport";
@@ -31,18 +32,14 @@ app.use(passport.initialize());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname) + "/views");
 
-/******** Mount app router ********/
+/******** Mount API router ********/
 app.use("/api/v1", router);
 
+/******* Mount swagger docs router  ********/
 app.use("/api-docs", swaggerRouter);
 
-// success page after successfully login using oAuth provides
-app.get("/", (req: Request, res: Response) => {
-	res.render("index", { message: "Login success" });
-});
-app.get("/login-success", (req: Request, res: Response) => {
-	res.render("login-success", { message: "Login success" });
-});
+/******* Mount views router  ********/
+app.use("/", viewsRouter);
 
 /******** Global entity parse error handler ********/
 app.use(entityParseHandler);
