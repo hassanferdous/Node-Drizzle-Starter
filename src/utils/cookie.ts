@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import { Response } from "express";
 
 interface SetCookieOptions {
@@ -21,7 +22,7 @@ export function setCookie(
 		maxAge: options.maxAge,
 		path: options.path ?? "/",
 		sameSite: options.sameSite ?? "lax",
-		domain: options.domain,
+		domain: options.domain
 	});
 }
 
@@ -34,20 +35,20 @@ export function setAuthCookies(res: Response, tokens: TokenOptions): void {
 	if (tokens.access_token) {
 		setCookie(res, "access_token", tokens.access_token, {
 			httpOnly: true,
-			secure: false,
+			secure: config.app.env === "production" ? true : false,
 			sameSite: "lax",
 			path: "/",
-			maxAge: 60 * 10 * 1000, // 10min
+			maxAge: 60 * 10 * 1000 // 10min
 		});
 	}
 
 	if (tokens.refresh_token) {
 		setCookie(res, "refresh_token", tokens.refresh_token, {
 			httpOnly: true,
-			secure: false,
+			secure: config.app.env === "production" ? true : false,
 			sameSite: "lax",
 			path: "/",
-			maxAge: 60 * 60 * 1000 * 24, // 1day
+			maxAge: 60 * 60 * 1000 * 24 // 1day
 		});
 	}
 }

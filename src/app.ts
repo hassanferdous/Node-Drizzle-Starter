@@ -1,20 +1,21 @@
-import express, { Request, Response } from "express";
-import cors from "cors";
-import morgan from "morgan";
-import passport from "passport";
-import dotenv from "dotenv";
 import "@/config/db"; // Just import to ensure DB is connected
-import cookieParser from "cookie-parser";
 import {
 	entityParseHandler,
 	errorHandler
 } from "@middlewares/error.middleware";
-import router from "./routes";
 import { safeJsonParser } from "@middlewares/safe-parse.middleware";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import express, { Request, Response } from "express";
+import morgan from "morgan";
+import passport from "passport";
+import router from "./routes";
 
 /******** Passport strategies ********/
 import "@domains/v1/auth/passport";
 import path from "node:path";
+import swaggerRouter from "./swagger";
 
 /******** Initialize Express App ********/
 const app = express();
@@ -32,6 +33,8 @@ app.set("views", path.join(__dirname) + "/views");
 
 /******** Mount app router ********/
 app.use("/api/v1", router);
+
+app.use("/api-docs", swaggerRouter);
 
 // success page after successfully login using oAuth provides
 app.get("/", (req: Request, res: Response) => {
