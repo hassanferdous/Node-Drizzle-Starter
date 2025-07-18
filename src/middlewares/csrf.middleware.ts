@@ -14,7 +14,7 @@ export default async function csrfProtection(
 	if (!isCookies) return next();
 	// Check if the csrf token is valid and present
 	const cached = await redis.get(user?.sid);
-	if (!cached) return throwError("Session expired or invalid CSRF token", 403);
+	if (!cached) return throwError("Session expired", 403);
 	const session = JSON.parse(cached) as Session;
 	if (session.csrf !== _req.csrf) return throwError("Invalid CSRF token", 403);
 	next();
