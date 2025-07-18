@@ -6,7 +6,7 @@ import { sendSuccess } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { UserServices } from "./service";
 import { createSchema, updateSchema, userPermissionSchema } from "./validation";
-import csrf from "@/middlewares/csrf.middleware";
+import csrfProtection from "@/middlewares/csrf.middleware";
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post(
 	"/",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["user:manage", "user:create"]),
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
@@ -51,7 +51,7 @@ router.get(
 router.put(
 	"/:id",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["user:manage", "user:update"]),
 	validate({ body: updateSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -65,7 +65,7 @@ router.put(
 router.delete(
 	"/:id",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["user:manage", "user:delete"]),
 	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -91,7 +91,7 @@ router.get(
 router.post(
 	"/:id/additional-permissions",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -117,7 +117,7 @@ router.get(
 router.delete(
 	"/:id/additional-permissions",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -134,7 +134,7 @@ router.delete(
 router.post(
 	"/:id/denied-permissions",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -157,7 +157,7 @@ router.get(
 router.delete(
 	"/:id/denied-permissions",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage"]),
 	validate({ body: userPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {

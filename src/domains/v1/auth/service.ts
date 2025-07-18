@@ -14,28 +14,38 @@ import redis from "@/lib/redis";
 import { db } from "@/config/db";
 import { hashedPassword } from "@/utils/password-hash";
 import { v4 as uuidv4 } from "uuid";
+import { config } from "@/config";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
+export async function createSession(user: User) {
+	const permissions = await PermissionServices.getUserPermissions(user);
+	const sid = `session:user:${user.id}`;
+	const csrf = uuidv4();
+
+	await redis.set(
+		sid,
+		JSON.stringify({ csrf, permissions, userId: user.id }),
+		"EX",
+		parseInt(config.auth.accessTokenDuration)
+	);
+	return { csrf, permissions, sid };
+}
+
 // Generate access token
 async function generateAccessToken(user: User) {
-	const permissions = await PermissionServices.getUserPermissions(user);
-	const permissionKey = `user:${user.id}:permission`;
-	await redis.set(
-		permissionKey,
-		JSON.stringify(permissions),
-		"EX",
-		60 * 10 // 10min
-	);
+	const { csrf, sid } = await createSession(user);
 	const tokens = generateToken({
-		user: { ...user, permissionKey: permissionKey }
+		user: { id: user.id, email: user.email },
+		sid: sid
 	});
 	const data = {
-		user,
+		user: { id: user.id, email: user.email },
 		...tokens,
-		permissionKey: permissionKey
+		csrf
 	};
+
 	await UserServices.createUserRefreshToken({
 		userId: user.id,
 		refreshToken: tokens.refresh_token as string
@@ -84,7 +94,6 @@ export const AuthServices = {
 				if (err) return next(err);
 				if (!user) return res.redirect("/login?error=OAuthFailed");
 				const { tokens, redirectUrl } = await generateOneTimeCode(user);
-				console.log({ tokens });
 				setAuthCookies(res, tokens as TokenOptions);
 				return res.redirect(redirectUrl);
 			}

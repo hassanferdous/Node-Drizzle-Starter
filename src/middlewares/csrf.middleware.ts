@@ -1,19 +1,21 @@
-import cusrf from "csurf";
+import redis from "@/lib/redis";
+import { throwError } from "@/utils/error";
 import { NextFunction, Request, Response } from "express";
+import { Session } from "..";
 
-// Cookie-based CSRF middleware
-const csrfProtection = cusrf({
-	cookie: {
-		httpOnly: true,
-		sameSite: "lax",
-		secure: process.env.NODE_ENV === "production"
-	}
-});
-
-export default function csrf(req: Request, res: Response, next: NextFunction) {
-	const token_from_cookie = !!req.cookies.access_token;
-	if (token_from_cookie) return csrfProtection(req, res, next);
-
-	// Skip CSRF if Authorization header is present
+export default async function csrfProtection(
+	req: Request,
+	res: Response,
+	next: NextFunction
+) {
+	const _req = req as Request & { csrf?: string; _isCookies: boolean };
+	const isCookies = !!_req._isCookies;
+	const user = req.user as Express.User & { sid: string };
+	if (!isCookies) return next();
+	// Check if the csrf token is valid and present
+	const cached = await redis.get(user?.sid);
+	if (!cached) return throwError("Session expired or invalid CSRF token", 403);
+	const session = JSON.parse(cached) as Session;
+	if (session.csrf !== _req.csrf) return throwError("Invalid CSRF token", 403);
 	next();
 }

@@ -1,6 +1,5 @@
-import csrf from "@/middlewares/csrf.middleware";
 import router from "@domains/v1/user/api";
 import { Router } from "express";
 export default function defineRoutes(expressRouter: Router) {
-	expressRouter.use("/users", csrf, router);
+	expressRouter.use("/users", router);
 }

@@ -6,7 +6,7 @@ import authorize from "@/middlewares/authorize.middleware";
 import validate from "@/middlewares/validate.middleware";
 import { addPermissionSchema, createSchema } from "./validation";
 import { idParamSchema } from "@/lib/common-zod-schema";
-import csrf from "@/middlewares/csrf.middleware";
+import csrfProtection from "@/middlewares/csrf.middleware";
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post(
 	"/",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["role:manage"]),
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
@@ -50,7 +50,7 @@ router.get(
 router.put(
 	"/:id",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
@@ -64,7 +64,7 @@ router.put(
 router.delete(
 	"/:id",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
@@ -78,7 +78,7 @@ router.delete(
 router.post(
 	"/:id/permissions",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["role:manage"]),
 	validate({ body: addPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -105,7 +105,7 @@ router.get(
 router.delete(
 	"/:id/permissions",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["role:manage"]),
 	validate({ body: addPermissionSchema, params: idParamSchema }),
 	async (req: Request, res: Response) => {
@@ -119,7 +119,7 @@ router.delete(
 router.delete(
 	"/:id/permissions/all",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["role:manage"]),
 	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {

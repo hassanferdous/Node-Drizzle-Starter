@@ -9,7 +9,7 @@ export const generateToken = (payload: any, type: TokenType = "both") => {
 				payload,
 				config.auth.jwtAccessTokenSecret,
 				{
-					expiresIn: config.auth.accessTokenDuration as any
+					expiresIn: parseInt(config.auth.accessTokenDuration)
 				}
 			);
 			tokens.refresh_token = jwt.sign(
@@ -25,7 +25,7 @@ export const generateToken = (payload: any, type: TokenType = "both") => {
 				payload,
 				config.auth.jwtAccessTokenSecret,
 				{
-					expiresIn: config.auth.accessTokenDuration as any
+					expiresIn: parseInt(config.auth.accessTokenDuration)
 				}
 			);
 			break;

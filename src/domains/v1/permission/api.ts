@@ -5,7 +5,7 @@ import auth from "@/middlewares/auth.middleware";
 import validate from "@/middlewares/validate.middleware";
 import { createSchema, multiDeleteSchema } from "./validation";
 import authorize from "@/middlewares/authorize.middleware";
-import csrf from "@/middlewares/csrf.middleware";
+import csrfProtection from "@/middlewares/csrf.middleware";
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ const router = express.Router();
 router.post(
 	"/",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage", "permission:create"]),
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
@@ -49,7 +49,7 @@ router.get(
 router.put(
 	"/:id",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage", "permission:update"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
@@ -63,7 +63,7 @@ router.put(
 router.delete(
 	"/",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage", "permission:delete"]),
 	validate({ body: multiDeleteSchema }),
 	async (req: Request, res: Response) => {
@@ -76,7 +76,7 @@ router.delete(
 router.delete(
 	"/:id",
 	auth,
-	csrf,
+	csrfProtection,
 	authorize(["permission:manage", "permission:delete"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
