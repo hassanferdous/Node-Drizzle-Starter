@@ -17,10 +17,13 @@ import viewsRouter from "./routes/view-routes";
 import "@domains/v1/auth/passport";
 import path from "node:path";
 import swaggerRouter from "./swagger";
-import csrf from "./middlewares/csrf.middleware";
+import initWorkders from "./queues";
 
 /******** Initialize Express App ********/
 const app = express();
+
+/********  Boot all workers ********/
+initWorkders();
 
 dotenv.config();
 app.use(cors());

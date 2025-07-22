@@ -31,3 +31,7 @@ export const exchageSchema = z.object({
 		.uuid("Invalid code")
 		.nonempty("Missing code")
 });
+
+export const forgotPasswordSchema = z.object({
+	email: z.string().email().nonempty("Email is required")
+});

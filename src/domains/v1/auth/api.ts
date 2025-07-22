@@ -2,7 +2,12 @@ import validate from "@/middlewares/validate.middleware";
 import express from "express";
 import passport from "passport";
 import { AuthServices } from "./service";
-import { exchageSchema, loginSchema, registerSchema } from "./validation";
+import {
+	exchageSchema,
+	forgotPasswordSchema,
+	loginSchema,
+	registerSchema
+} from "./validation";
 import csrfProtection from "@/middlewares/csrf.middleware";
 import rateLimit from "@/lib/rate-limit";
 
@@ -54,6 +59,13 @@ router.get(
 	"/exchange",
 	validate({ query: exchageSchema }),
 	AuthServices.exchangeToken
+);
+
+router.post(
+	"/forgot-password",
+	csrfProtection,
+	validate({ body: forgotPasswordSchema }),
+	AuthServices.forgotPassword
 );
 
 export default router;

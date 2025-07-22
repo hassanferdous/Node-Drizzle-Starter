@@ -1,20 +1,22 @@
+import { config } from "@/config";
+import { db } from "@/config/db";
 import { usersTable, userTokensTable } from "@/db/schema";
+import { generateOTP, saveOTP } from "@/lib/otp";
+import redis from "@/lib/redis";
+import { sendOtpEmailJob } from "@/queues/email.producer";
 import { setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { throwError } from "@/utils/error";
 import { generateToken, verifyToken } from "@/utils/jwt";
+import { hashedPassword } from "@/utils/password-hash";
 import { sendSuccess } from "@/utils/response";
-import { UserServices } from "@domains/v1/user/service";
 import { PermissionServices } from "@domains/v1/permission/service";
+import { UserServices } from "@domains/v1/user/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
-import { User } from "../user/service";
-import redis from "@/lib/redis";
-import { db } from "@/config/db";
-import { hashedPassword } from "@/utils/password-hash";
 import { v4 as uuidv4 } from "uuid";
-import { config } from "@/config";
+import { User } from "../user/service";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
@@ -158,5 +160,36 @@ export const AuthServices = {
 			});
 
 		return sendSuccess(res, result);
-	}
+	},
+
+	forgotPassword: async (req: Request, res: Response) => {
+		const otp = generateOTP();
+		await saveOTP(req.body.email, otp);
+		await sendOtpEmailJob({
+			subject: "🔐 Password Reset Code",
+			to: config.smtp.SMTP_USER,
+			html: `
+				<div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+					<h2 style="color: #4CAF50;">Password Reset Request</h2>
+					<p>Hello,</p>
+					<p>You requested to reset your password. Please use the following One-Time Password (OTP) to proceed:</p>
+					<div style="font-size: 24px; font-weight: bold; background: #f4f4f4; padding: 10px; text-align: center; border-radius: 5px; width: 200px; margin: 20px auto;">
+					${otp}
+					</div>
+					<p><strong>This code will expire in 2 minutes.</strong></p>
+					<p>If you did not request this, please ignore this email.</p>
+					<hr style="margin-top: 30px;" />
+					<p style="font-size: 12px; color: #888;">Thank you,<br />The YourApp Team</p>
+				</div>
+			`
+		});
+		sendSuccess(
+			res,
+			{},
+			200,
+			"Sent OTP successfully. Please check your email"
+		);
+	},
+
+	verifyOTP: async () => {}
 };

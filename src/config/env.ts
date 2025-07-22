@@ -28,9 +28,16 @@ const envSchema = z.object({
 	REDIS_HOST: z.string().min(1),
 	REDIS_PORT: z.string().min(1),
 
-	// gooogle
+	// oAuth credentials
 	AUTH_GOOGLE_CLIENT_ID: z.string().nonempty(),
-	AUTH_GOOGLE_CLIENT_SECRET: z.string().nonempty()
+	AUTH_GOOGLE_CLIENT_SECRET: z.string().nonempty(),
+
+	// Mailer credentials
+	SMTP_HOST: z.string().nonempty(),
+	SMTP_PORT: z.string().nonempty(),
+	SMTP_USER: z.string().nonempty(),
+	SMTP_PASS: z.string().nonempty(),
+	SMTP_FROM: z.string().nonempty()
 });
 
 // Validate and parse
