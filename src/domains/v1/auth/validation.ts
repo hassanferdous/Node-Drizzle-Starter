@@ -35,3 +35,16 @@ export const exchageSchema = z.object({
 export const forgotPasswordSchema = z.object({
 	email: z.string().email().nonempty("Email is required")
 });
+
+export const verifyOTPSchema = z.object({
+	email: z.string().email().nonempty("Email is required"),
+	otp: z.string().length(6, "Must be 6 characters")
+});
+
+export const resetPasswordSchema = z.object({
+	newPassword: z
+		.string()
+		.min(8, "Password must be at least 8 characters")
+		.nonempty("Password is required"),
+	token: z.string().nonempty("Password is required")
+});

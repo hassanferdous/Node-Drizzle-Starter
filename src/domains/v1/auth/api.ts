@@ -6,7 +6,9 @@ import {
 	exchageSchema,
 	forgotPasswordSchema,
 	loginSchema,
-	registerSchema
+	registerSchema,
+	resetPasswordSchema,
+	verifyOTPSchema
 } from "./validation";
 import csrfProtection from "@/middlewares/csrf.middleware";
 import rateLimit from "@/lib/rate-limit";
@@ -16,6 +18,18 @@ const router = express.Router();
 const authLimiter = rateLimit({
 	windowMs: 10 * 60,
 	limit: 5,
+	message: {
+		status: 429,
+		isError: true,
+		isSuccess: false,
+		message: "Too many login attempts, please try again after 15 minutes.",
+		data: {}
+	}
+});
+
+const otpLimiter = rateLimit({
+	windowMs: 15 * 60,
+	limit: 3,
 	message: {
 		status: 429,
 		isError: true,
@@ -63,9 +77,21 @@ router.get(
 
 router.post(
 	"/forgot-password",
-	csrfProtection,
+	// otpLimiter,
 	validate({ body: forgotPasswordSchema }),
 	AuthServices.forgotPassword
+);
+router.post(
+	"/verify-otp",
+	// otpLimiter,
+	validate({ body: verifyOTPSchema }),
+	AuthServices.verifyOTPHandler
+);
+router.post(
+	"/reset-password",
+	// otpLimiter,
+	validate({ body: resetPasswordSchema }),
+	AuthServices.resetPassword
 );
 
 export default router;

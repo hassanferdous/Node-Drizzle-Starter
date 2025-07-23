@@ -128,7 +128,10 @@ export const UserServices = {
 			.from(usersTable);
 	},
 
-	update: async (id: number, data: NewUser): Promise<Partial<User> | null> => {
+	update: async (
+		id: number,
+		data: Partial<NewUser>
+	): Promise<Partial<User> | null> => {
 		const [updated] = await db
 			.update(usersTable)
 			.set(data)

@@ -16,7 +16,9 @@ passport.use(
 			}
 			const isMatched = await bcrypt.compare(password, user.password);
 			if (!isMatched) {
-				return cb(null, false, { message: "Incorrect email or password." });
+				return cb({ message: "Incorrect email or password." }, false, {
+					message: "Incorrect email or password."
+				});
 			}
 			const { password: userPassword, img, age, ...santizedUser } = user;
 			return cb(null, santizedUser);

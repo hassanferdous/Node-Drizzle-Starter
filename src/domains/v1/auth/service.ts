@@ -1,12 +1,17 @@
 import { config } from "@/config";
 import { db } from "@/config/db";
 import { usersTable, userTokensTable } from "@/db/schema";
-import { generateOTP, saveOTP } from "@/lib/otp";
+import { generateOTP, saveOTP, verifyOTP } from "@/lib/otp";
 import redis from "@/lib/redis";
 import { sendOtpEmailJob } from "@/queues/email.producer";
 import { setAuthCookies, TokenOptions } from "@/utils/cookie";
-import { throwError } from "@/utils/error";
-import { generateToken, verifyToken } from "@/utils/jwt";
+import { AppError, throwError } from "@/utils/error";
+import {
+	generateAuthTokens,
+	generateToken,
+	verifyAuthTokens,
+	verifyToken
+} from "@/utils/jwt";
 import { hashedPassword } from "@/utils/password-hash";
 import { sendSuccess } from "@/utils/response";
 import { PermissionServices } from "@domains/v1/permission/service";
@@ -38,7 +43,7 @@ export async function createSession(user: User) {
 // Generate access token
 async function generateAccessToken(user: User) {
 	const { csrf, sid } = await createSession(user);
-	const tokens = generateToken({
+	const tokens = generateAuthTokens({
 		user: { id: user.id, email: user.email },
 		sid: sid
 	});
@@ -76,10 +81,7 @@ export const AuthServices = {
 			"local",
 			{ session: false },
 			async (err: any, user: User, info: any) => {
-				if (err) return next(err);
-				if (!user) {
-					throwError(info?.message || "Invalid credentials", 401);
-				}
+				if (err || !user) next(new AppError("Invalid credentials", 401));
 				const { data, tokens } = await generateAccessToken(user);
 				setAuthCookies(res, tokens as TokenOptions);
 				// Success — you can return user data or generate JWT
@@ -114,7 +116,7 @@ export const AuthServices = {
 		const refresh_token = token as string;
 		if (!refresh_token) return throwError("Malformed refresh token", 401);
 		try {
-			const decodeded = verifyToken(token, "refresh") as JwtPayload & {
+			const decodeded = verifyAuthTokens(token, "refresh") as JwtPayload & {
 				user: User;
 			};
 			if (decodeded.exp! > Date.now())
@@ -123,7 +125,10 @@ export const AuthServices = {
 				decodeded.user.id
 			);
 			if (!storedToken) return throwError("Refresh token not found", 403);
-			const new_token = generateToken({ user: decodeded.user }, "access");
+			const new_token = generateAuthTokens(
+				{ user: decodeded.user },
+				"access"
+			);
 			setAuthCookies(res, { access_token: new_token.access_token });
 			return sendSuccess(
 				res,
@@ -163,8 +168,16 @@ export const AuthServices = {
 	},
 
 	forgotPassword: async (req: Request, res: Response) => {
+		const user = await UserServices.getByEmail(req.body.email);
+		if (!user)
+			return sendSuccess(
+				res,
+				{},
+				200,
+				"If the email exists, OTP has been sent."
+			);
 		const otp = generateOTP();
-		await saveOTP(req.body.email, otp);
+		await saveOTP(user.id, otp);
 		await sendOtpEmailJob({
 			subject: "🔐 Password Reset Code",
 			to: config.smtp.SMTP_USER,
@@ -176,7 +189,7 @@ export const AuthServices = {
 					<div style="font-size: 24px; font-weight: bold; background: #f4f4f4; padding: 10px; text-align: center; border-radius: 5px; width: 200px; margin: 20px auto;">
 					${otp}
 					</div>
-					<p><strong>This code will expire in 2 minutes.</strong></p>
+					<p><strong>This code will expire in 3 minutes.</strong></p>
 					<p>If you did not request this, please ignore this email.</p>
 					<hr style="margin-top: 30px;" />
 					<p style="font-size: 12px; color: #888;">Thank you,<br />The YourApp Team</p>
@@ -191,5 +204,40 @@ export const AuthServices = {
 		);
 	},
 
-	verifyOTP: async () => {}
+	verifyOTPHandler: async (req: Request, res: Response) => {
+		const { email, otp } = req.body;
+		const user = await UserServices.getByEmail(email);
+		if (!user) throwError("Invalid OTP or User doesn't exist");
+		const isValid = await verifyOTP(user.id, otp);
+
+		if (!isValid) throwError("Invalid OTP");
+		const resetToken = generateToken(
+			{ email: user.email, id: user.id, purpose: "reset-password" },
+			{
+				expiresIn: "5m",
+				secret: config.auth.jwtAccessTokenSecret
+			}
+		);
+		sendSuccess(
+			res,
+			{ token: resetToken },
+			200,
+			"OTP verfication has been succesful"
+		);
+	},
+
+	resetPassword: async (req: Request, res: Response) => {
+		const { newPassword, token } = req.body;
+		const decoded = verifyToken(token, config.auth.jwtAccessTokenSecret);
+		if (!decoded) return throwError("Invaild or Expired token");
+		const { id } = decoded as unknown as User;
+		const hash = await hashedPassword(newPassword);
+		await UserServices.update(id, { password: hash as string });
+		return sendSuccess(
+			res,
+			{},
+			200,
+			"Successful! Please login with your new password"
+		);
+	}
 };
