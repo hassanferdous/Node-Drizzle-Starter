@@ -101,7 +101,10 @@ export const UserServices = {
 		if (!user) return user;
 
 		if (populatePermissions) {
-			const permissions = await PermissionServices.getUserPermissions(user);
+			const permissions = await PermissionServices.getUserPermissions(
+				user,
+				true
+			);
 			return { ...user, permissions };
 		}
 		return { ...user };

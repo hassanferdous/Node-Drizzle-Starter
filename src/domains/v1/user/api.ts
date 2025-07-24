@@ -36,7 +36,6 @@ router.get(
 
 // Profile
 router.get("/profile", auth, async (req: Request, res: Response) => {
-	console.log("profile");
 	const user = req.user as { id: number };
 	const data = await UserServices.getById(user.id);
 	sendSuccess(res, data, 200, "Successfully fetched profile.");

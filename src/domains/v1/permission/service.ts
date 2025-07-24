@@ -71,10 +71,14 @@ export const PermissionServices = {
 	},
 
 	// get logged in user's permission
-	getUserPermissions: async (user: { roleId: number | null; id: number }) => {
+	getUserPermissions: async (
+		user: { roleId: number | null; id: number },
+		withId: boolean = false
+	) => {
 		const rolePerms = await db
 			.select({
-				permission: permissions.name
+				id: permissions.id,
+				name: permissions.name
 			})
 			.from(role_permissions)
 			.leftJoin(
@@ -85,7 +89,8 @@ export const PermissionServices = {
 
 		const userPerms = await db
 			.select({
-				permission: permissions.name
+				id: permissions.id,
+				name: permissions.name
 			})
 			.from(userPermissions)
 			.leftJoin(
@@ -93,9 +98,11 @@ export const PermissionServices = {
 				eq(permissions.id, userPermissions.permissionId)
 			)
 			.where(eq(userPermissions.userId, user.id));
+
 		const deniedPerms = await db
 			.select({
-				permission: permissions.name
+				id: permissions.id,
+				name: permissions.name
 			})
 			.from(permissions)
 			.leftJoin(
@@ -103,17 +110,32 @@ export const PermissionServices = {
 				eq(permissions.id, deniedPermissions.permissionId)
 			)
 			.where(eq(deniedPermissions.userId, user.id));
-		const _rolePermissions = rolePerms.map((rp) => rp.permission as string);
-		const _userPermissions = userPerms.map((p) => p.permission as string);
-		const _deniedPermissions = deniedPerms.map((p) => p.permission as string);
-		const deniedSet = new Set(_deniedPermissions);
-		const uniquePermissionsSet = [
-			...new Set([..._rolePermissions, ..._userPermissions])
-		];
-		const allowedPermissions = uniquePermissionsSet.filter(
-			(perm) => !deniedSet.has(perm as string)
-		);
 
-		return allowedPermissions;
+		const _rolePermissions = rolePerms.map((p) => ({
+			id: p.id,
+			name: p.name
+		}));
+		const _userPermissions = userPerms.map((p) => ({
+			id: p.id,
+			name: p.name
+		}));
+		const _deniedPermissionsSet = new Set(deniedPerms.map((p) => p.name));
+
+		const merged = [..._rolePermissions, ..._userPermissions];
+
+		const uniquePermissionsMap = new Map();
+		for (const perm of merged) {
+			if (!uniquePermissionsMap.has(perm.name)) {
+				uniquePermissionsMap.set(perm.name, perm);
+			}
+		}
+
+		const allowedPermissions = Array.from(
+			uniquePermissionsMap.values()
+		).filter((perm) => !_deniedPermissionsSet.has(perm.name));
+
+		return withId
+			? allowedPermissions // [{ id, name }]
+			: allowedPermissions.map((p) => p.name); // ['permission1', 'permission2']
 	}
 };

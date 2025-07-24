@@ -12,7 +12,6 @@ export default function auth(req: Request, res: Response, next: NextFunction) {
 
 	try {
 		const decoded = verifyAuthTokens(access_token, "access") as JwtPayload;
-		console.log({ decoded });
 		const _req = req as Request & { csrf?: string; _isCookies: boolean };
 		_req.user = { ...decoded.user, sid: decoded.sid };
 		_req._isCookies = _isCookies;
