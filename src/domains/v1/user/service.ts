@@ -2,12 +2,12 @@ import { db } from "@/config/db";
 import {
 	deniedPermissions,
 	permissions,
-	role_permissions,
 	userPermissions,
 	usersTable,
 	userTokensTable
 } from "@/db/schema";
 import { throwError } from "@/utils/error";
+import { PermissionServices } from "@domains/v1/permission/service";
 import bcrypt from "bcryptjs";
 import {
 	and,
@@ -17,7 +17,7 @@ import {
 	InferSelectModel
 } from "drizzle-orm";
 import { NewRefreshToken } from "../auth/service";
-import { PermissionServices } from "@domains/v1/permission/service";
+import { RoleServices } from "../role/service";
 
 export type User = Omit<InferSelectModel<typeof usersTable>, "password">;
 export type NewUser = InferInsertModel<typeof usersTable>;
@@ -83,7 +83,8 @@ export const UserServices = {
 	},
 
 	getById: async (
-		id: number
+		id: number,
+		populatePermissions: boolean = true
 	): Promise<Partial<User & { permissions?: string[] }> | null> => {
 		const result = await db
 			.select({
@@ -99,8 +100,11 @@ export const UserServices = {
 		const user = result[0] ?? null;
 		if (!user) return user;
 
-		const permissions = await PermissionServices.getUserPermissions(user);
-		return { ...user, permissions };
+		if (populatePermissions) {
+			const permissions = await PermissionServices.getUserPermissions(user);
+			return { ...user, permissions };
+		}
+		return { ...user };
 	},
 
 	getByEmail: async (email: string, populatePassword: boolean = false) => {
@@ -155,7 +159,7 @@ export const UserServices = {
 		return deleted ?? null;
 	},
 
-	getRefreshUserToken: async (userId: number) => {
+	getUserRefreshToken: async (userId: number) => {
 		const results = await db
 			.select()
 			.from(userTokensTable)
@@ -170,20 +174,17 @@ export const UserServices = {
 
 	// get User role permissions (role-permissions + additional-permissions - denied permissions)
 	getUserPermissions: async (userId: number) => {
-		const user = await db
-			.select()
-			.from(usersTable)
-			.where(eq(usersTable.id, userId))
-			.limit(1)
-			.then((res) => res[0]);
-
-		if (!user) throwError("User not found");
-		const permissions = PermissionServices.getUserPermissions(user);
+		const user = await UserServices.getById(userId, false);
+		if (!user) throwError("User not found", 400);
+		const permissions = PermissionServices.getUserPermissions({
+			id: user?.id as number,
+			roleId: user?.roleId as number
+		});
 		return permissions;
 	},
 
 	// get User role permissions
-	getUserRolePermissions: async (userId: number): Promise<number[]> => {
+	getUserRolePermissions: async (userId: number) => {
 		const user = await db
 			.select({ roleId: usersTable.roleId })
 			.from(usersTable)
@@ -191,14 +192,11 @@ export const UserServices = {
 			.limit(1)
 			.then((res) => res[0]);
 
-		if (!user) throwError("User not found");
+		if (!user) throwError("User not found", 400);
+		if (!user.roleId) return [];
+		const rolePerms = await RoleServices.getPermissions(user.roleId);
 
-		const rolePerms = await db
-			.select({ permissionId: role_permissions.permissionId })
-			.from(role_permissions)
-			.where(eq(role_permissions.roleId, user.roleId as number));
-
-		return rolePerms.map((p) => p.permissionId as number);
+		return rolePerms;
 	},
 
 	// User's additioinal permissions
@@ -211,7 +209,7 @@ export const UserServices = {
 			? permission
 			: [permission];
 		const validToAdd = permissionArray.filter(
-			(pid) => !rolePermIds.includes(pid)
+			(p) => !rolePermIds.find((rP) => rP.permissionId === p)
 		);
 		if (!validToAdd.length) {
 			throwError(
@@ -247,8 +245,8 @@ export const UserServices = {
 		const permissionArray = Array.isArray(permission)
 			? permission
 			: [permission];
-		const validToDeny = permissionArray.filter((pid) =>
-			rolePermIds.includes(pid)
+		const validToDeny = permissionArray.filter(
+			(p) => !rolePermIds.find((rP) => rP.permissionId === p)
 		);
 		if (validToDeny.length) {
 			return insertUserPermissions(deniedPermissions, userId, permission);

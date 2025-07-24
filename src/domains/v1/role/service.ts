@@ -66,9 +66,8 @@ export const RoleServices = {
 	getPermissions: async (id: number): Promise<any[]> => {
 		return await db
 			.select({
-				roleId: role_permissions.roleId,
-				name: permissions.name,
-				permissionId: permissions.id
+				id: permissions.id,
+				name: permissions.name
 			})
 			.from(role_permissions)
 			.where(eq(role_permissions.roleId, id))

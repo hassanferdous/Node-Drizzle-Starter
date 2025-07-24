@@ -7,13 +7,15 @@ type Permisions = string[];
 export default function authorize(requiredPermissions: Permisions) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		const user = req.user as User & { sid: string };
+		if (!user) throwError("Unauthenticated", 401);
 		const session = await getCachedOrLoad(
 			user.sid,
 			async () => {
 				return await createSession(user);
 			},
-			60 * 10
+			60 * 10 // 10min
 		);
+
 		const isAllowed = requiredPermissions.some((p) =>
 			session.permissions.includes(p)
 		);

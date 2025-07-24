@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { verifyToken } from "../utils/jwt";
-import { throwError } from "../utils/error";
 import { JwtPayload } from "jsonwebtoken";
+import { throwError } from "../utils/error";
+import { verifyAuthTokens } from "../utils/jwt";
 
 export default function auth(req: Request, res: Response, next: NextFunction) {
 	const cookies = req.cookies;
@@ -11,7 +11,8 @@ export default function auth(req: Request, res: Response, next: NextFunction) {
 	const _isCookies = !!cookies.access_token;
 
 	try {
-		const decoded = verifyToken(access_token, "access") as JwtPayload;
+		const decoded = verifyAuthTokens(access_token, "access") as JwtPayload;
+		console.log({ decoded });
 		const _req = req as Request & { csrf?: string; _isCookies: boolean };
 		_req.user = { ...decoded.user, sid: decoded.sid };
 		_req._isCookies = _isCookies;
@@ -22,7 +23,7 @@ export default function auth(req: Request, res: Response, next: NextFunction) {
 		_req.csrf =
 			(Array.isArray(csrfHeader) ? csrfHeader[0] : csrfHeader) || csrfBody;
 		next();
-	} catch (error) {
-		throwError("Invalid Token", 401);
+	} catch (error: any) {
+		throwError(error.message || "Invalid Token", 401);
 	}
 }

@@ -81,7 +81,7 @@ export const PermissionServices = {
 				permissions,
 				eq(role_permissions.permissionId, permissions.id)
 			)
-			.where(eq(role_permissions.roleId, user.roleId as number));
+			.where(eq(role_permissions.roleId, user?.roleId as number));
 
 		const userPerms = await db
 			.select({

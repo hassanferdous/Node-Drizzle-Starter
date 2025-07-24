@@ -30,7 +30,6 @@ export async function createSession(user: User) {
 	const permissions = await PermissionServices.getUserPermissions(user);
 	const sid = `session:user:${user.id}`;
 	const csrf = uuidv4();
-
 	await redis.set(
 		sid,
 		JSON.stringify({ csrf, permissions, userId: user.id }),
@@ -41,29 +40,24 @@ export async function createSession(user: User) {
 }
 
 // Generate access token
-async function generateAccessToken(user: User) {
+async function generateUserTokens(user: User) {
 	const { csrf, sid } = await createSession(user);
 	const tokens = generateAuthTokens({
-		user: { id: user.id, email: user.email },
+		user: { id: user.id, email: user.email, roleId: user.roleId },
 		sid: sid
 	});
 	const data = {
-		user: { id: user.id, email: user.email },
+		user: { id: user.id, email: user.email, roleId: user.roleId },
 		...tokens,
 		csrf
 	};
-
-	await UserServices.createUserRefreshToken({
-		userId: user.id,
-		refreshToken: tokens.refresh_token as string
-	});
 
 	return { data, tokens: tokens as TokenOptions };
 }
 
 // Generate one time code and return redirect url
 async function generateOneTimeCode(user: User) {
-	const { data, tokens } = await generateAccessToken(user);
+	const { data, tokens } = await generateUserTokens(user);
 	const oneTimeCode = uuidv4();
 	const cacheKey = `auth:code:${oneTimeCode}`;
 	await redis.set(
@@ -82,7 +76,7 @@ export const AuthServices = {
 			{ session: false },
 			async (err: any, user: User, info: any) => {
 				if (err || !user) next(new AppError("Invalid credentials", 401));
-				const { data, tokens } = await generateAccessToken(user);
+				const { data, tokens } = await generateUserTokens(user);
 				setAuthCookies(res, tokens as TokenOptions);
 				// Success — you can return user data or generate JWT
 				return sendSuccess(res, data, 200, "Login successful");
@@ -121,7 +115,7 @@ export const AuthServices = {
 			};
 			if (decodeded.exp! > Date.now())
 				return throwError("Invalid Token", 401);
-			const storedToken = await UserServices.getRefreshUserToken(
+			const storedToken = await UserServices.getUserRefreshToken(
 				decodeded.user.id
 			);
 			if (!storedToken) return throwError("Refresh token not found", 403);
@@ -130,10 +124,14 @@ export const AuthServices = {
 				"access"
 			);
 			setAuthCookies(res, { access_token: new_token.access_token });
+			const { csrf, sid, permissions } = await createSession(decodeded.user);
+
 			return sendSuccess(
 				res,
 				{
-					access_token: new_token.access_token
+					access_token: new_token.access_token,
+					csrf,
+					sid
 				},
 				201,
 				"Successfully generated Access Token!!"

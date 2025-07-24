@@ -34,6 +34,14 @@ router.get(
 	}
 );
 
+// Profile
+router.get("/profile", auth, async (req: Request, res: Response) => {
+	console.log("profile");
+	const user = req.user as { id: number };
+	const data = await UserServices.getById(user.id);
+	sendSuccess(res, data, 200, "Successfully fetched profile.");
+});
+
 // Read one
 router.get(
 	"/:id",
@@ -75,19 +83,25 @@ router.delete(
 	}
 );
 
-// User role permission
+/************ User role permission  *********/
 router.get(
 	"/:id/role-permissions",
+	auth,
 	authorize(["permission:manage"]),
 	validate({ params: idParamSchema }),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.getUserRolePermissions(id);
-		sendSuccess(res, data, 200, "Successfully fetched user!");
+		sendSuccess(
+			res,
+			data,
+			200,
+			"Successfully fetched user's role-permissions'!"
+		);
 	}
 );
 
-// User additional permissions
+/************ User additional permissions  *********/
 router.post(
 	"/:id/additional-permissions",
 	auth,
@@ -130,7 +144,7 @@ router.delete(
 	}
 );
 
-// User denied permissions
+/************ User denied permissions  *********/
 router.post(
 	"/:id/denied-permissions",
 	auth,
