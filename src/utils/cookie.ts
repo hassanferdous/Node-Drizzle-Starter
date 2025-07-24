@@ -29,12 +29,22 @@ export function setCookie(
 export interface TokenOptions {
 	access_token?: string;
 	refresh_token?: string;
+	csrf?: string;
 }
 
 export function setAuthCookies(res: Response, tokens: TokenOptions): void {
 	if (tokens.access_token) {
 		setCookie(res, "access_token", tokens.access_token, {
 			httpOnly: true,
+			secure: config.app.env === "production" ? true : false,
+			sameSite: "lax",
+			path: "/",
+			maxAge: 60 * 10 * 1000 // 10min
+		});
+	}
+	if (tokens.csrf) {
+		setCookie(res, "csrf", tokens.csrf, {
+			httpOnly: false,
 			secure: config.app.env === "production" ? true : false,
 			sameSite: "lax",
 			path: "/",

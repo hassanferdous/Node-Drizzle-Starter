@@ -28,7 +28,7 @@ export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
 export async function createSession(user: User) {
 	const permissions = await PermissionServices.getUserPermissions(user);
-	const sid = `session:user:${user.id}`;
+	const sid = `session:user:${user?.id}`;
 	const csrf = uuidv4();
 	await redis.set(
 		sid,
@@ -52,7 +52,7 @@ async function generateUserTokens(user: User) {
 		csrf
 	};
 
-	return { data, tokens: tokens as TokenOptions };
+	return { data, tokens: { ...tokens, csrf } as TokenOptions };
 }
 
 // Generate one time code and return redirect url

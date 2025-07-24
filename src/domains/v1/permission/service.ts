@@ -97,7 +97,7 @@ export const PermissionServices = {
 				permissions,
 				eq(permissions.id, userPermissions.permissionId)
 			)
-			.where(eq(userPermissions.userId, user.id));
+			.where(eq(userPermissions.userId, user?.id));
 
 		const deniedPerms = await db
 			.select({
@@ -109,7 +109,7 @@ export const PermissionServices = {
 				deniedPermissions,
 				eq(permissions.id, deniedPermissions.permissionId)
 			)
-			.where(eq(deniedPermissions.userId, user.id));
+			.where(eq(deniedPermissions.userId, user?.id));
 
 		const _rolePermissions = rolePerms.map((p) => ({
 			id: p.id,
