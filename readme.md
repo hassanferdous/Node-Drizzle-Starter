@@ -13,68 +13,85 @@ cd express-api-v1
 pnpm install
 ```
 
-## 3. Database Migration
+## Project structure
 
-Run the following command to apply Prisma migrations to your PostgreSQL database:
-
-```bash
-npx prisma migrate deploy
-```
-
-or, for development:
-
-```bash
-npx prisma migrate dev
-```
-
-## 4. Generate API (Prisma Model)
-
-To create a new model, edit your `prisma/schema.prisma` file and add your model definition. Then generate the Prisma client:
-
-```bash
-npx prisma generate
-```
-
-## 5. Seed Data
-
-To seed your database with initial data, run:
-
-```bash
-npx prisma db seed
-```
-
-_(Ensure you have a `prisma/seed.ts` or `prisma/seed.js` file set up for seeding.)_
-
-## 6. Generate a New Entity Base
-
-You can quickly scaffold a new entity base using the custom script. Run:
-
-```bash
-pnpm run generate:api <entityName>
-```
-
-Replace `<entityName>` with your desired entity name (e.g., `User`, `Product`). This will generate the necessary boilerplate files for the new entity.
-
-## 7. Running the Project
-
-Start the development server:
-
-```bash
-pnpm run dev
-```
-
-or
-
-```bash
-pnpm start
-```
-
-The API will be available at `http://localhost:3000` by default.
-
----
-
-**Note:**
-
--  Ensure your PostgreSQL database connection URL is set in your `.env` file as `DATABASE_URL`.
--  For more commands, refer to the [Prisma CLI documentation](https://www.prisma.io/docs/reference/api-reference/command-reference).
--  This project uses Express.js v5.
+├── .dockerignore
+├── .env
+├── .env.development
+├── .env.example
+├── .gitignore
+├── .prettierrc
+├── Dockerfile
+├── README.md
+├── compose.yaml
+├── drizzle
+│   ├── 0000_smart_molten_man.sql
+├── drizzle.config.ts
+├── package-lock.json
+├── package.json
+├── pnpm-lock.yaml
+├── src
+│   ├── .DS_Store
+│   ├── app.ts
+│   ├── config
+│   │   ├── .DS_Store
+│   │   ├── config.development.json
+│   │   ├── db.ts
+│   │   ├── env.ts
+│   │   └── index.ts
+│   ├── db
+│   │   ├── common.ts
+│   │   └── schema.ts
+│   ├── domains
+│   │   └── v1
+│   │   ├── auth
+│   │   │   ├── api.ts
+│   │   │   ├── docs.ts
+│   │   │   ├── index.ts
+│   │   │   ├── passport
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── strategy.google.ts
+│   │   │   │   └── strategy.local.ts
+│   │   │   ├── service.ts
+│   │   │   └── validation.ts
+│   │   └── user
+│   │   ├── api.ts
+│   │   ├── index.ts
+│   │   ├── service.ts
+│   │   └── validation.ts
+│   ├── index.d.ts
+│   ├── lib
+│   │   ├── common-zod-schema.ts
+│   │   ├── rate-limit.ts
+│   │   └── redis.ts
+│   ├── middlewares
+│   │   ├── auth.middleware.ts
+│   │   ├── authorize.middleware.ts
+│   │   ├── csrf.middleware.ts
+│   │   ├── error.middleware.ts
+│   │   ├── safe-parse.middleware.ts
+│   │   └── validate.middleware.ts
+│   ├── routes
+│   │   ├── index.ts
+│   │   └── view-routes.ts
+│   ├── scripts
+│   │   └── generate-api.js
+│   ├── seed.ts
+│   ├── server.ts
+│   ├── swagger
+│   │   ├── component.schema.ts
+│   │   └── index.ts
+│   ├── utils
+│   │   ├── cookie.ts
+│   │   ├── error.ts
+│   │   ├── formatZodError.ts
+│   │   ├── getCachedOrLoad.ts
+│   │   ├── jwt.ts
+│   │   ├── password-hash.ts
+│   │   └── response.ts
+│   └── views
+│   ├── index.ejs
+│   ├── login-success.ejs
+│   └── login.ejs
+├── structure.txt
+└── tsconfig.json

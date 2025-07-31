@@ -1,7 +1,13 @@
 import { Router } from "express";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { LoginInput, RegisterInput } from "./component.schema";
+import {
+	ForgotPasswordRequest,
+	LoginInput,
+	RegisterInput,
+	ResetPasswordRequest,
+	VerifyOTPRequest
+} from "./component.schema";
 import { config } from "@/config";
 const swaggerRouter = Router();
 const options = {
@@ -20,7 +26,10 @@ const options = {
 		components: {
 			schemas: {
 				LoginInput,
-				RegisterInput
+				RegisterInput,
+				VerifyOTPRequest,
+				ResetPasswordRequest,
+				ForgotPasswordRequest
 			}
 		}
 	},

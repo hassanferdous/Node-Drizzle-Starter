@@ -5,7 +5,6 @@ services:
     ports:
       - ${PORT}:${PORT}
     volumes:
-      # - .:/app
       - .:/app
       - /app/node_modules
 
@@ -30,6 +29,15 @@ services:
       - postgres
       - redis
     command: pnpm dev
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
 
   postgres:
     container_name: drizzle_postgres

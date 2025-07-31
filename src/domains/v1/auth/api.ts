@@ -81,12 +81,14 @@ router.post(
 	validate({ body: forgotPasswordSchema }),
 	AuthServices.forgotPassword
 );
+
 router.post(
 	"/verify-otp",
 	// otpLimiter,
 	validate({ body: verifyOTPSchema }),
 	AuthServices.verifyOTPHandler
 );
+
 router.post(
 	"/reset-password",
 	// otpLimiter,
