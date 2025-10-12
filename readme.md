@@ -296,12 +296,11 @@ export default router;
 #### `index.ts`
 
 ```ts
+import router from "@domains/v1/role/api";
 import { Router } from "express";
-import productRouter from "./api";
-
-const router = Router();
-router.use("/products", productRouter);
-export default router;
+export default function defineRoutes(expressRouter: Router) {
+	expressRouter.use("/products", router);
+}
 ```
 
 #### Add to Global Routes
@@ -309,8 +308,13 @@ export default router;
 `src/routes/index.ts`:
 
 ```ts
-import product from "@/domains/v1/product";
-router.use("/v1", product);
+import productRoutes from "@domains/v1/product";
+function defineRoutes(expressRouter: Router) {
+	// exampleRoutes(expressRouter);
+	productRoutes(expressRouter);
+	// default routers
+	defaultRoutes(expressRouter);
+}
 ```
 
 ---

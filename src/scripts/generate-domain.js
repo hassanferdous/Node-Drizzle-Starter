@@ -157,6 +157,22 @@ export const updateSchema = z.object({
 `
 );
 
+// --- docs.ts ---
+fs.writeFileSync(
+	path.join(baseDir, `docs.ts`),
+	`/**
+ * @swagger
+ * /${collectionName}s:
+ *   get:
+ *     summary: Dummy documentation for ${collectionName}s
+ *     tags: [${capitalized}]
+ *     responses:
+ *       200:
+ *         description: A dummy response
+ */
+`
+);
+
 console.log(
 	`✅ ${capitalized} domain generated in /src/domains/v1/${collectionName}`
 );
