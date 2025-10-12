@@ -217,7 +217,11 @@ This runs `src/seed.ts` to populate initial data.
 
 ## 🧱 Creating a New Domain
 
-Each **domain** represents a feature module (e.g., `auth`, `user`, `product`).
+Each **domain** represents a feature module (e.g., `auth`, `user`, `product`). To create a new domain create files and folders as shown below or simply run this command:
+
+```bash
+pnpm generate:domain {domain_name}
+```
 
 ### 1️⃣ Create the Folder
 
@@ -348,12 +352,6 @@ export const productSchemas = {
 		required: ["name", "price", "stock"]
 	}
 };
-```
-
-Or simply run:
-
-```bash
-pnpm generate:domain {domain_name}
 ```
 
 ### ⚙️ Access Swagger UI
