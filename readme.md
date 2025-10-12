@@ -9,6 +9,7 @@ This project follows a **domain-based modular architecture**, supports **Swagger
 
 ## Project structure
 
+```
 ├── .dockerignore
 ├── .env
 ├── .env.development
@@ -93,6 +94,7 @@ This project follows a **domain-based modular architecture**, supports **Swagger
 └── tsconfig.json
 
 ---
+```
 
 ## ⚙️ Prerequisites
 
