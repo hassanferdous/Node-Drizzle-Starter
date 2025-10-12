@@ -6,7 +6,7 @@
 		"build": "tsc && tsc-alias",
 		"start": "NODE_ENV=production node dist/src/server.js",
 		"dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
-		"generate:api": "node src/scripts/generate-api.js",
+		"generate:domain": "node src/scripts/generate-domain.js",
 		"seed-db": "ts-node src/seed.ts",
 		"install:container": "docker exec -it drizzle_express pnpm install"
 	},

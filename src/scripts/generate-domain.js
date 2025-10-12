@@ -158,5 +158,5 @@ export const updateSchema = z.object({
 );
 
 console.log(
-	`✅ ${capitalized} api generated in /src/domains/v1/${collectionName}`
+	`✅ ${capitalized} domain generated in /src/domains/v1/${collectionName}`
 );
