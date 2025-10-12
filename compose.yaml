@@ -10,6 +10,7 @@ services:
 
     environment:
       - NODE_ENV=${NODE_ENV}
+      - LOG_LEVEL=${LOG_LEVEL}
       - PORT=${PORT}
       - HASH_SALT=${HASH_SALT}
       - JWT_ACCESSTOKEN_SECRET=${JWT_ACCESSTOKEN_SECRET}

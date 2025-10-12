@@ -7,7 +7,8 @@
 		"start": "NODE_ENV=production node dist/src/server.js",
 		"dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
 		"generate:api": "node src/scripts/generate-api.js",
-		"seed-db": "ts-node src/seed.ts"
+		"seed-db": "ts-node src/seed.ts",
+		"install:container": "docker exec -it drizzle_express pnpm install"
 	},
 	"dependencies": {
 		"bcryptjs": "^3.0.2",
@@ -31,6 +32,8 @@
 		"swagger-jsdoc": "^6.2.8",
 		"swagger-ui-express": "^5.0.1",
 		"uuid": "^11.1.0",
+		"winston": "^3.18.3",
+		"winston-daily-rotate-file": "^5.0.0",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {

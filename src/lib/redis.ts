@@ -2,6 +2,7 @@
 import Redis from "ioredis";
 
 import { config } from "@/config";
+import logger from "./logger";
 
 const redisClient = new Redis({
 	host: config.redis.host || "localhost",
@@ -26,11 +27,11 @@ export const bullRedisClient = new Redis({
 });
 
 redisClient.on("connect", () => {
-	console.log("✅ Redis connected");
+	logger.log("info", "✅ Redis connected");
 });
 
 redisClient.on("error", (err) => {
-	console.error("❌ Redis connection error:", err);
+	logger.log("error", "❌ Redis connection error:", err);
 });
 
 export default redisClient;

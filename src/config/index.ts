@@ -3,7 +3,8 @@ import { env } from "./env";
 export const config = {
 	app: {
 		env: env.NODE_ENV,
-		port: Number(env.PORT)
+		port: Number(env.PORT),
+		logLevel: env.LOG_LEVEL
 	},
 	db: {
 		db_name: env.POSTGRES_DB,
