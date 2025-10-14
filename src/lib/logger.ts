@@ -10,11 +10,10 @@ if (!fs.existsSync(logDir)) {
 	fs.mkdirSync(logDir);
 }
 
-const { combine, timestamp, printf, colorize, errors, json } = winston.format;
+const { combine, timestamp, printf, errors, json } = winston.format;
 
 // Define log format for development
 const devFormat = combine(
-	colorize(),
 	timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
 	printf(({ timestamp, level, message, stack }) => {
 		return `${timestamp} [${level}]: ${stack || message}`;
