@@ -1,12 +1,12 @@
 import { idParamSchema } from "@/lib/common-zod-schema";
 import auth from "@/middlewares/auth.middleware";
 import authorize from "@/middlewares/authorize.middleware";
+import csrfProtection from "@/middlewares/csrf.middleware";
 import validate from "@/middlewares/validate.middleware";
-import { sendSuccess } from "@/utils/response";
+import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { UserServices } from "./service";
 import { createSchema, updateSchema, userPermissionSchema } from "./validation";
-import csrfProtection from "@/middlewares/csrf.middleware";
 
 const router = express.Router();
 
@@ -19,7 +19,12 @@ router.post(
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
 		const data = await UserServices.create(req.body);
-		sendSuccess(res, data, 201, "Successfully created new user!");
+		return AppResponse.success(
+			res,
+			data,
+			201,
+			"Successfully created new user!"
+		);
 	}
 );
 
@@ -30,7 +35,12 @@ router.get(
 	authorize(["user:manage", "user:read"]),
 	async (req: Request, res: Response) => {
 		const data = await UserServices.getAll();
-		sendSuccess(res, data, 200, "Successfully fetched all user!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully fetched all user!"
+		);
 	}
 );
 
@@ -38,7 +48,7 @@ router.get(
 router.get("/profile", auth, async (req: Request, res: Response) => {
 	const user = req.user as { id: number };
 	const data = await UserServices.getById(user.id);
-	sendSuccess(res, data, 200, "Successfully fetched profile.");
+	return AppResponse.success(res, data, 200, "Successfully fetched profile.");
 });
 
 // Read one
@@ -50,7 +60,7 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.getById(id);
-		sendSuccess(res, data, 200, "Successfully fetched user!");
+		return AppResponse.success(res, data, 200, "Successfully fetched user!");
 	}
 );
 
@@ -64,7 +74,7 @@ router.put(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.update(id, req.body);
-		sendSuccess(res, data, 200, "Successfully updated user!");
+		return AppResponse.success(res, data, 200, "Successfully updated user!");
 	}
 );
 
@@ -78,7 +88,7 @@ router.delete(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.delete(id);
-		sendSuccess(res, data, 200, "Successfully deleted user!");
+		return AppResponse.success(res, data, 200, "Successfully deleted user!");
 	}
 );
 
@@ -91,7 +101,7 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.getUserRolePermissions(id);
-		sendSuccess(
+		return AppResponse.success(
 			res,
 			data,
 			200,
@@ -113,7 +123,12 @@ router.post(
 			id,
 			req.body.permission
 		);
-		sendSuccess(res, data, 200, "Successfully granted permissions!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully granted permissions!"
+		);
 	}
 );
 router.get(
@@ -124,7 +139,12 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.getAdditionalPermission(id);
-		sendSuccess(res, data, 200, "Successfully fetched granted permissions!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully fetched granted permissions!"
+		);
 	}
 );
 router.delete(
@@ -139,7 +159,12 @@ router.delete(
 			id,
 			req.body.permission
 		);
-		sendSuccess(res, data, 200, "Successfully deleted granted permissions!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully deleted granted permissions!"
+		);
 	}
 );
 
@@ -153,7 +178,12 @@ router.post(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.deniedPermission(id, req.body.permission);
-		sendSuccess(res, data, 200, "Successfully denied role permissions!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully denied role permissions!"
+		);
 	}
 );
 router.get(
@@ -164,7 +194,12 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await UserServices.getDeniedPermission(id);
-		sendSuccess(res, data, 200, "Successfully fetced denied permissions!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully fetced denied permissions!"
+		);
 	}
 );
 router.delete(
@@ -179,7 +214,12 @@ router.delete(
 			id,
 			req.body.permission
 		);
-		sendSuccess(res, data, 200, "Successfully deleted denied permissions!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully deleted denied permissions!"
+		);
 	}
 );
 

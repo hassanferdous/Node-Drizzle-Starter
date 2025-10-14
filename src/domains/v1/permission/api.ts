@@ -1,11 +1,11 @@
-import express, { Request, Response } from "express";
-import { PermissionServices } from "./service";
-import { sendSuccess } from "@/utils/response";
 import auth from "@/middlewares/auth.middleware";
-import validate from "@/middlewares/validate.middleware";
-import { createSchema, multiDeleteSchema } from "./validation";
 import authorize from "@/middlewares/authorize.middleware";
 import csrfProtection from "@/middlewares/csrf.middleware";
+import validate from "@/middlewares/validate.middleware";
+import { AppResponse } from "@/utils/response";
+import express, { Request, Response } from "express";
+import { PermissionServices } from "./service";
+import { createSchema, multiDeleteSchema } from "./validation";
 
 const router = express.Router();
 
@@ -18,7 +18,12 @@ router.post(
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
 		const data = await PermissionServices.create(req.body.permissions);
-		sendSuccess(res, data, 201, "Successfully created new permission!");
+		return AppResponse.success(
+			res,
+			data,
+			201,
+			"Successfully created new permission!"
+		);
 	}
 );
 
@@ -29,7 +34,12 @@ router.get(
 	authorize(["permission:manage", "permission:read"]),
 	async (req: Request, res: Response) => {
 		const data = await PermissionServices.getAll();
-		sendSuccess(res, data, 200, "Successfully fetched all permission!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully fetched all permission!"
+		);
 	}
 );
 
@@ -41,7 +51,12 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await PermissionServices.getById(id);
-		sendSuccess(res, data, 200, "Successfully fetched permission!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully fetched permission!"
+		);
 	}
 );
 
@@ -55,7 +70,12 @@ router.put(
 		const id = +req.params.id;
 		await PermissionServices.update(id, req.body);
 		const data = await PermissionServices.getById(id);
-		sendSuccess(res, data, 200, "Successfully updated permission!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully updated permission!"
+		);
 	}
 );
 
@@ -68,7 +88,12 @@ router.delete(
 	validate({ body: multiDeleteSchema }),
 	async (req: Request, res: Response) => {
 		const data = await PermissionServices.multiDelete(req.body.ids);
-		sendSuccess(res, data, 200, "Successfully deleted permission!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully deleted permission!"
+		);
 	}
 );
 
@@ -81,7 +106,12 @@ router.delete(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await PermissionServices.delete(id);
-		sendSuccess(res, data, 200, "Successfully deleted permission!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully deleted permission!"
+		);
 	}
 );
 

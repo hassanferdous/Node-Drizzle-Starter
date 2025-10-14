@@ -1,12 +1,12 @@
-import express, { Request, Response } from "express";
-import { RoleServices } from "./service";
-import { sendSuccess } from "@/utils/response";
+import { idParamSchema } from "@/lib/common-zod-schema";
 import auth from "@/middlewares/auth.middleware";
 import authorize from "@/middlewares/authorize.middleware";
-import validate from "@/middlewares/validate.middleware";
-import { addPermissionSchema, createSchema } from "./validation";
-import { idParamSchema } from "@/lib/common-zod-schema";
 import csrfProtection from "@/middlewares/csrf.middleware";
+import validate from "@/middlewares/validate.middleware";
+import { AppResponse } from "@/utils/response";
+import express, { Request, Response } from "express";
+import { RoleServices } from "./service";
+import { addPermissionSchema, createSchema } from "./validation";
 
 const router = express.Router();
 
@@ -19,7 +19,12 @@ router.post(
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
 		const data = await RoleServices.create(req.body);
-		sendSuccess(res, data, 201, "Successfully created new role!");
+		return AppResponse.success(
+			res,
+			data,
+			201,
+			"Successfully created new role!"
+		);
 	}
 );
 
@@ -30,7 +35,12 @@ router.get(
 	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const data = await RoleServices.getAll();
-		sendSuccess(res, data, 200, "Successfully fetched all role!");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Successfully fetched all role!"
+		);
 	}
 );
 
@@ -42,7 +52,7 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await RoleServices.getById(id);
-		sendSuccess(res, data, 200, "Successfully fetched role!");
+		return AppResponse.success(res, data, 200, "Successfully fetched role!");
 	}
 );
 
@@ -56,7 +66,7 @@ router.put(
 		const id = +req.params.id;
 		await RoleServices.update(id, req.body);
 		const data = await RoleServices.getById(id);
-		sendSuccess(res, data, 200, "Successfully updated role!");
+		return AppResponse.success(res, data, 200, "Successfully updated role!");
 	}
 );
 
@@ -69,7 +79,7 @@ router.delete(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await RoleServices.delete(id);
-		sendSuccess(res, data, 200, "Successfully deleted role!");
+		return AppResponse.success(res, data, 200, "Successfully deleted role!");
 	}
 );
 
@@ -84,7 +94,12 @@ router.post(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await RoleServices.addPermissions(id, req.body.permissions);
-		sendSuccess(res, data, 200, "Permissions assigned successfully.");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Permissions assigned successfully."
+		);
 	}
 );
 
@@ -97,7 +112,12 @@ router.get(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		const data = await RoleServices.getPermissions(id);
-		sendSuccess(res, data, 200, "Permissions fetched successfully.");
+		return AppResponse.success(
+			res,
+			data,
+			200,
+			"Permissions fetched successfully."
+		);
 	}
 );
 
@@ -111,7 +131,12 @@ router.delete(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		await RoleServices.removePermissions(id, req.body.permissions);
-		sendSuccess(res, {}, 200, "Permissions removed successfully.");
+		return AppResponse.success(
+			res,
+			{},
+			200,
+			"Permissions removed successfully."
+		);
 	}
 );
 
@@ -125,7 +150,12 @@ router.delete(
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		await RoleServices.removeAllPermissions(id);
-		sendSuccess(res, {}, 200, "All permissions removed successfully.");
+		return AppResponse.success(
+			res,
+			{},
+			200,
+			"All permissions removed successfully."
+		);
 	}
 );
 

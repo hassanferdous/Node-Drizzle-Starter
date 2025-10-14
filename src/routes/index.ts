@@ -1,10 +1,10 @@
 import { db } from "@/config/db";
 import { throwError } from "@/utils/error";
-import { sendSuccess } from "@/utils/response";
+import { AppResponse } from "@/utils/response";
 import authRoutes from "@domains/v1/auth";
-import usersRoutes from "@domains/v1/user";
-import rolesRoutes from "@domains/v1/role";
 import permissionsRoutes from "@domains/v1/permission";
+import rolesRoutes from "@domains/v1/role";
+import usersRoutes from "@domains/v1/user";
 import { sql } from "drizzle-orm";
 import { Router } from "express";
 const router = Router();
@@ -15,7 +15,7 @@ function defaultRoutes(expressRouter: Router) {
 			// Check database connection
 			await db.execute(sql`SELECT 1`);
 
-			sendSuccess(
+			return AppResponse.success(
 				res,
 				{
 					status: "healthy",

@@ -13,7 +13,7 @@ import {
 	verifyToken
 } from "@/utils/jwt";
 import { hashedPassword } from "@/utils/password-hash";
-import { sendSuccess } from "@/utils/response";
+import { AppResponse } from "@/utils/response";
 import { PermissionServices } from "@domains/v1/permission/service";
 import { UserServices } from "@domains/v1/user/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
@@ -79,7 +79,7 @@ export const AuthServices = {
 				const { data, tokens } = await generateUserTokens(user);
 				setAuthCookies(res, tokens as TokenOptions);
 				// Success — you can return user data or generate JWT
-				return sendSuccess(res, data, 200, "Login successful");
+				return AppResponse.success(res, data, 200, "Login successful");
 			}
 		)(req, res, next);
 	},
@@ -126,7 +126,7 @@ export const AuthServices = {
 			setAuthCookies(res, { access_token: new_token.access_token });
 			const { csrf, sid, permissions } = await createSession(decodeded.user);
 
-			return sendSuccess(
+			return AppResponse.success(
 				res,
 				{
 					access_token: new_token.access_token,
@@ -146,7 +146,7 @@ export const AuthServices = {
 		const cached = await redis.get(`auth:code:${code}`);
 		if (!cached) return throwError("Invalid or expired code", 400);
 		await redis.del(`auth:code:${code}`);
-		return sendSuccess(res, JSON.parse(cached), 200);
+		return AppResponse.success(res, JSON.parse(cached), 200);
 	},
 
 	register: async (req: Request, res: Response) => {
@@ -162,13 +162,13 @@ export const AuthServices = {
 				roleId: usersTable.roleId
 			});
 
-		return sendSuccess(res, result);
+		return AppResponse.success(res, result);
 	},
 
 	forgotPassword: async (req: Request, res: Response) => {
 		const user = await UserServices.getByEmail(req.body.email);
 		if (!user)
-			return sendSuccess(
+			return AppResponse.success(
 				res,
 				{},
 				200,
@@ -194,7 +194,7 @@ export const AuthServices = {
 				</div>
 			`
 		});
-		sendSuccess(
+		return AppResponse.success(
 			res,
 			{},
 			200,
@@ -216,7 +216,7 @@ export const AuthServices = {
 				secret: config.auth.jwtAccessTokenSecret
 			}
 		);
-		sendSuccess(
+		return AppResponse.success(
 			res,
 			{ token: resetToken },
 			200,
@@ -231,7 +231,7 @@ export const AuthServices = {
 		const { id } = decoded as unknown as User;
 		const hash = await hashedPassword(newPassword);
 		await UserServices.update(id, { password: hash as string });
-		return sendSuccess(
+		return AppResponse.success(
 			res,
 			{},
 			200,

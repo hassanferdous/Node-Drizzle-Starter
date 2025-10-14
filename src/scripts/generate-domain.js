@@ -24,27 +24,27 @@ fs.writeFileSync(
 	path.join(baseDir, `api.ts`),
 	`import express, { Request, Response } from "express";
 import { ${capitalized}Services } from "./service";
-import { sendSuccess } from "@/utils/response";
+import { AppResponse } from "@/utils/response";
 
 const router = express.Router();
 
 // Create
 router.post("/", async (req: Request, res: Response) => {
 	const data = await ${capitalized}Services.create(req.body);
-	sendSuccess(res, data, 201, "Successfully created new ${collectionName}!");
+	return AppResponse.success(res, data, 201, "Successfully created new ${collectionName}!");
 });
 
 // Read all
 router.get("/", async (req: Request, res: Response) => {
 	const data = await ${capitalized}Services.getAll();
-	sendSuccess(res, data, 200, "Successfully fetched all ${collectionName}!");
+	return AppResponse.success(res, data, 200, "Successfully fetched all ${collectionName}!");
 });
 
 // Read one
 router.get("/:id", async (req: Request, res: Response) => {
 	const id = +req.params.id;
 	const data = await ${capitalized}Services.getById(id);
-	sendSuccess(res, data, 200, "Successfully fetched ${collectionName}!");
+	return AppResponse.success(res, data, 200, "Successfully fetched ${collectionName}!");
 });
 
 // Update
@@ -52,14 +52,14 @@ router.put("/:id", async (req: Request, res: Response) => {
 	const id = +req.params.id;
 	await ${capitalized}Services.update(id, req.body);
 	const data = await ${capitalized}Services.getById(id);
-	sendSuccess(res, data, 200, "Successfully updated ${collectionName}!");
+	return AppResponse.success(res, data, 200, "Successfully updated ${collectionName}!");
 });
 
 // Delete
 router.delete("/:id", async (req: Request, res: Response) => {
 	const id = +req.params.id;
 	const data = await ${capitalized}Services.delete(id);
-	sendSuccess(res, data, 200, "Successfully deleted ${collectionName}!");
+	return AppResponse.success(res, data, 200, "Successfully deleted ${collectionName}!");
 });
 
 export default router;

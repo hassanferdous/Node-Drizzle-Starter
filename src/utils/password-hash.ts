@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import bcrypt from "bcryptjs";
 export const hashedPassword = async (plain_password: string) => {
 	try {
@@ -8,7 +9,7 @@ export const hashedPassword = async (plain_password: string) => {
 		const hash = await bcrypt.hash(plain_password, salt);
 		return hash;
 	} catch (error) {
-		console.log("while hashing error");
+		logger.error("while hashing error", error);
 		return false;
 	}
 };
