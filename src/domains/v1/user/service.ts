@@ -170,7 +170,7 @@ export const UserServices = {
 		const storedToken = results[0] ?? null;
 		return storedToken;
 	},
-	createUserRefreshToken: async (data: NewRefreshToken) => {
+	createUserSessionDB: async (data: NewRefreshToken) => {
 		const result = await db.insert(userTokensTable).values(data);
 		return result;
 	},

@@ -42,10 +42,18 @@ export async function createSession(user: User) {
 // Generate access token
 async function generateUserTokens(user: User) {
 	const { csrf, sid } = await createSession(user);
+
 	const tokens = generateAuthTokens({
 		user: { id: user.id, email: user.email, roleId: user.roleId },
 		sid: sid
 	});
+
+	// create user session in dbs
+	await UserServices.createUserSessionDB({
+		userId: user.id,
+		refreshToken: tokens.refresh_token as string
+	});
+
 	const data = {
 		user: { id: user.id, email: user.email, roleId: user.roleId },
 		...tokens,
