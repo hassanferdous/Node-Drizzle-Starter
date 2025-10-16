@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1751691562376,
-      "tag": "0000_smart_molten_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1752342246180,
-      "tag": "0001_friendly_ogun",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752487515119,
-      "tag": "0002_yummy_goblin_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1752491842907,
-      "tag": "0003_sharp_marauders",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1752569013960,
-      "tag": "0004_shocking_jack_murdock",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1752569474948,
-      "tag": "0005_wild_mysterio",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1752591519399,
-      "tag": "0006_misty_patch",
+      "when": 1760633117094,
+      "tag": "0000_lean_shaman",
       "breakpoints": true
     }
   ]

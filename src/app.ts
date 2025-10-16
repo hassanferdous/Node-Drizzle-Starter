@@ -16,14 +16,18 @@ import viewsRouter from "./routes/view-routes";
 /******** Passport strategies ********/
 import "@domains/v1/auth/passport";
 import path from "node:path";
-import swaggerRouter from "./swagger";
+import registerJobs from "./jobs";
 import initWorkders from "./queues";
+import swaggerRouter from "./swagger";
 
 /******** Initialize Express App ********/
 const app = express();
 
 /********  Boot all workers ********/
 initWorkders();
+
+/********* Register jobs ******/
+registerJobs();
 
 dotenv.config();
 app.use(cors());

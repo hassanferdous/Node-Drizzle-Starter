@@ -51,7 +51,8 @@ async function generateUserTokens(user: User) {
 	// create user session in dbs
 	await UserServices.createUserSessionDB({
 		userId: user.id,
-		refreshToken: tokens.refresh_token as string
+		refreshToken: tokens.refresh_token as string,
+		expires_at: new Date(Date.now() + 60 * 60 * 1000 * 24) // 1day
 	});
 
 	const data = {

@@ -17,7 +17,7 @@ services:
       - JWT_REFRESHTOKEN_SECRET=${JWT_REFRESHTOKEN_SECRET}
       - ACCESSTOKEN_DURATION=${ACCESSTOKEN_DURATION}
       - REFRESHTOKEN_DURATION=${REFRESHTOKEN_DURATION}
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - AUTH_GOOGLE_CLIENT_ID=${AUTH_GOOGLE_CLIENT_ID}
       - AUTH_GOOGLE_CLIENT_SECRET=${AUTH_GOOGLE_CLIENT_SECRET}
       - SMTP_HOST=${SMTP_HOST}
@@ -50,7 +50,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   redis:
     container_name: redis_cache

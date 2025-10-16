@@ -4,6 +4,7 @@ import {
 	primaryKey,
 	serial,
 	text,
+	timestamp,
 	varchar
 } from "drizzle-orm/pg-core";
 import { timestampColumns } from "./common";
@@ -91,5 +92,6 @@ export const userTokensTable = pgTable("user_tokens", {
 	refreshToken: varchar({ length: 512 }).notNull().unique(),
 	userAgent: varchar({ length: 255 }),
 	ipAddress: varchar({ length: 50 }),
+	expires_at: timestamp({ withTimezone: true }).defaultNow().notNull(),
 	...timestampColumns
 });
