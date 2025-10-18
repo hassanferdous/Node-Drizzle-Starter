@@ -1,8 +1,7 @@
-import winston from "winston";
-import path from "path";
 import fs from "fs";
+import path from "path";
+import winston from "winston";
 import "winston-daily-rotate-file";
-import { config } from "@/config";
 
 // Ensure log directory exists
 const logDir = path.join(process.cwd(), "logs");
@@ -42,13 +41,13 @@ const errorTransport = new winston.transports.DailyRotateFile({
 
 // Create Winston logger instance
 const logger = winston.createLogger({
-	level: config.app.logLevel,
-	format: config.app.env === "production" ? prodFormat : devFormat,
+	level: process.env.LOG_LEVEL,
+	format: process.env.NODE_ENV === "production" ? prodFormat : devFormat,
 	transports: [logTransport, errorTransport],
 	exitOnError: false
 });
 
-if (config.app.env !== "production") {
+if (process.env.NODE_ENV !== "production") {
 	logger.add(
 		new winston.transports.Console({
 			handleExceptions: true,

@@ -25,10 +25,12 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM}
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
 
     depends_on:
       - postgres
       - redis
+      - rabbitmq
     command: pnpm dev
     develop:
       watch:
@@ -57,5 +59,19 @@ services:
     image: redis:8-alpine
     ports:
       - "6379:6379"
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:4-management
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq-lib:/var/lib/rabbitmq/
 volumes:
   pgdata:
+  rabbitmq-lib:
+    driver: local

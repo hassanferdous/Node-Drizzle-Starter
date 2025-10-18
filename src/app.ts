@@ -19,12 +19,16 @@ import path from "node:path";
 import registerJobs from "./jobs";
 import initWorkders from "./queues";
 import swaggerRouter from "./swagger";
+import mqConnection from "./mq/RabbitMqConnection";
 
 /******** Initialize Express App ********/
 const app = express();
 
 /********  Boot all workers ********/
 initWorkders();
+
+/****** Start RabbitMQ connection *******/
+mqConnection.connect();
 
 /********* Register jobs ******/
 registerJobs();
