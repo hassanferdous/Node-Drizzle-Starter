@@ -1,6 +1,6 @@
 import logger from "@/lib/logger";
 import amqp, { Channel, ChannelModel } from "amqplib";
-class RabbitMqConnection {
+class MqConnection {
 	private connected!: Boolean;
 	connection!: ChannelModel;
 	channel!: Channel;
@@ -75,6 +75,6 @@ class RabbitMqConnection {
 	}
 }
 
-const mqConnection = new RabbitMqConnection();
+const mqConnection = new MqConnection();
 
 export default mqConnection;

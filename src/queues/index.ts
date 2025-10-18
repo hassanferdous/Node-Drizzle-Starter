@@ -1,9 +1,9 @@
-import { startEmailWorker } from "./email.worker";
+import mqConnection from "@/mq/MqConnection";
+import { emailWorker } from "./email";
 
-function initWorkders() {
-	console.log("🚀 Initializing all workers...");
-	startEmailWorker();
-	console.log("✅ All workers initialized");
+async function initWorkders() {
+	await mqConnection.connect();
+	await emailWorker.start();
 }
 
 export default initWorkders;
