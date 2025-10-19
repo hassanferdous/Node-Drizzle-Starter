@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { config } from "@/config";
+import logger from "./logger";
 
 const transporter = nodemailer.createTransport({
 	host: config.smtp.SMTP_HOST,
@@ -32,9 +33,9 @@ export const sendEmail = async ({
 		text
 	});
 
-	console.log("📤 Email sent:", info.messageId);
+	logger.info("📤 Email sent:", info.messageId);
 	if (config.app.env === "development") {
-		console.log("📝 Preview URL:", nodemailer.getTestMessageUrl(info));
+		logger.info("📝 Preview URL:", nodemailer.getTestMessageUrl(info));
 	}
 	return info;
 };
