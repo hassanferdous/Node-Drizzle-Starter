@@ -1,7 +1,12 @@
 services:
   backend:
-    container_name: drizzle_express
-    build: .
+    image: drizzle-express-backend
+    container_name: express-app
+    build:
+      context: .
+      dockerfile: Dockerfile.${DOCKER_ENV:-dev}
+    env_file:
+      - ${ENV_FILE:-.env.development}
     ports:
       - ${PORT}:${PORT}
     volumes:
@@ -31,7 +36,6 @@ services:
       - postgres
       - redis
       - rabbitmq
-    command: pnpm dev
     develop:
       watch:
         - action: sync
@@ -39,11 +43,12 @@ services:
           target: /app/src
           ignore:
             - node_modules/
+            - dist/
         - action: rebuild
           path: package.json
 
   postgres:
-    container_name: drizzle_postgres
+    container_name: postgres_db
     image: postgres:15-alpine
     restart: always
     ports:

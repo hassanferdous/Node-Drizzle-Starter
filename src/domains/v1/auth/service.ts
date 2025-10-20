@@ -1,9 +1,9 @@
 import { config } from "@/config";
 import { db } from "@/config/db";
 import { usersTable, userTokensTable } from "@/db/schema";
-import { generateOTP, saveOTP, verifyOTP } from "@/lib/otp";
+import { generateOTP, verifyOTP } from "@/lib/otp";
 import redis from "@/lib/redis";
-import { sendOtpEmailJob } from "@/queues/email.producer";
+import { emailWorker } from "@/queues/email";
 import { setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { AppError, throwError } from "@/utils/error";
 import {
@@ -22,7 +22,6 @@ import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "../user/service";
-import { emailWorker } from "@/queues/email";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;

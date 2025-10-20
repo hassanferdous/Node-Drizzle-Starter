@@ -1,6 +1,8 @@
 node_modules
 dist
 .env
+.env.development
+logs
 Dockerfile
 docker-compose.yml
 *.log
