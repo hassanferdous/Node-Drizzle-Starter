@@ -4,7 +4,7 @@ import { usersTable, userTokensTable } from "@/db/schema";
 import { generateOTP, verifyOTP } from "@/lib/otp";
 import redis from "@/lib/redis";
 import { emailWorker } from "@/queues/email";
-import { setAuthCookies, TokenOptions } from "@/utils/cookie";
+import { clearAuthCookies, setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { AppError, throwError } from "@/utils/error";
 import {
 	generateAuthTokens,
@@ -245,5 +245,27 @@ export const AuthServices = {
 			200,
 			"Successful! Please login with your new password"
 		);
+	},
+
+	logout: async (req: Request, res: Response) => {
+		const token =
+			req.cookies.refresh_token ??
+			(req.headers["x-refresh-token"] as string | undefined);
+
+		if (token) {
+			try {
+				const decoded = verifyAuthTokens(token, "refresh") as JwtPayload & {
+					user: User;
+				};
+
+				await redis.del(`session:user:${decoded.user.id}`);
+				await UserServices.deleteUserRefreshToken(decoded.user.id);
+			} catch {
+				// swallow all token errors
+			}
+		}
+
+		clearAuthCookies(res);
+		return AppResponse.success(res, {}, 200, "Logout successful");
 	}
 };

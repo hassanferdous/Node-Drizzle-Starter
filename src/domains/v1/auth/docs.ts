@@ -60,6 +60,17 @@
 
 /**
  * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ */
+
+/**
+ * @swagger
  * /auth/refresh-token:
  *   post:
  *     summary: Refresh access token with refresh token

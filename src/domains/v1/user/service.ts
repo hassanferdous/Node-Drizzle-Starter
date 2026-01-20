@@ -174,6 +174,12 @@ export const UserServices = {
 		const result = await db.insert(userTokensTable).values(data);
 		return result;
 	},
+	deleteUserRefreshToken: async (userId: number) => {
+		const result = await db
+			.delete(userTokensTable)
+			.where(eq(userTokensTable.userId, userId));
+		return result;
+	},
 
 	// get User role permissions (role-permissions + additional-permissions - denied permissions)
 	getUserPermissions: async (userId: number) => {

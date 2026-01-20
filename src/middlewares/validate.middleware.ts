@@ -24,7 +24,9 @@ export default function validate(schemas: ValidationSchemas) {
 			next();
 		} catch (error) {
 			if (error instanceof ZodError) {
-				throwError("Validation failed", 400, formatZodError(error));
+				throwError("Validation failed", 400, {
+					errors: formatZodError(error)
+				});
 			}
 			throwError("Validation failed", 400);
 		}

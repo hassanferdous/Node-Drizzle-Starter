@@ -32,33 +32,49 @@ export interface TokenOptions {
 	csrf?: string;
 }
 
+const baseOptions = {
+	path: "/",
+	sameSite: "lax" as const,
+	secure: config.app.env === "production"
+};
 export function setAuthCookies(res: Response, tokens: TokenOptions): void {
 	if (tokens.access_token) {
 		setCookie(res, "access_token", tokens.access_token, {
+			...baseOptions,
 			httpOnly: true,
-			secure: config.app.env === "production" ? true : false,
-			sameSite: "lax",
-			path: "/",
 			maxAge: 60 * 10 * 1000 // 10min
 		});
 	}
 	if (tokens.csrf) {
 		setCookie(res, "csrf", tokens.csrf, {
+			...baseOptions,
 			httpOnly: false,
-			secure: config.app.env === "production" ? true : false,
-			sameSite: "lax",
-			path: "/",
 			maxAge: 60 * 10 * 1000 // 10min
 		});
 	}
 
 	if (tokens.refresh_token) {
 		setCookie(res, "refresh_token", tokens.refresh_token, {
+			...baseOptions,
 			httpOnly: true,
-			secure: config.app.env === "production" ? true : false,
-			sameSite: "lax",
-			path: "/",
 			maxAge: 60 * 60 * 1000 * 24 // 1day
 		});
 	}
+}
+
+export function clearAuthCookies(res: Response): void {
+	res.clearCookie("access_token", {
+		...baseOptions,
+		httpOnly: true
+	});
+
+	res.clearCookie("refresh_token", {
+		...baseOptions,
+		httpOnly: true
+	});
+
+	res.clearCookie("csrf", {
+		...baseOptions,
+		httpOnly: false
+	});
 }

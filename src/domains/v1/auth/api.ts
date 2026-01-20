@@ -67,4 +67,6 @@ router.post(
 	AuthServices.resetPassword
 );
 
+router.post("/logout", AuthServices.logout);
+
 export default router;
