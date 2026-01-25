@@ -1,22 +1,24 @@
 import auth from "@/middlewares/auth.middleware";
-import authorize from "@/middlewares/authorize.middleware";
 import csrfProtection from "@/middlewares/csrf.middleware";
 import validate from "@/middlewares/validate.middleware";
 import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { PermissionServices } from "./service";
 import { createSchema, multiDeleteSchema } from "./validation";
+import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
+import { throwError } from "@/utils/error";
 
 const router = express.Router();
 
 // Create
 router.post(
 	"/",
-	auth,
-	csrfProtection,
-	authorize(["permission:manage", "permission:create"]),
 	validate({ body: createSchema }),
+	auth,
+	caslAuthorize,
 	async (req: Request, res: Response) => {
+		if (!req.ability?.can("manage", "Permission"))
+			throwError("Forbidden.", 403, []);
 		const data = await PermissionServices.create(req.body.permissions);
 		return AppResponse.success(
 			res,
@@ -28,65 +30,56 @@ router.post(
 );
 
 // Read all
-router.get(
-	"/",
-	auth,
-	authorize(["permission:manage", "permission:read"]),
-	async (req: Request, res: Response) => {
-		const data = await PermissionServices.getAll();
-		return AppResponse.success(
-			res,
-			data,
-			200,
-			"Successfully fetched all permission!"
-		);
-	}
-);
+router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
+	if (!req.ability?.can("manage", "Permission"))
+		throwError("Forbidden.", 403, []);
+	const data = await PermissionServices.getAll();
+	return AppResponse.success(
+		res,
+		data,
+		200,
+		"Successfully fetched all permission!"
+	);
+});
 
 // Read one
-router.get(
-	"/:id",
-	auth,
-	authorize(["permission:manage", "permission:read"]),
-	async (req: Request, res: Response) => {
-		const id = +req.params.id;
-		const data = await PermissionServices.getById(id);
-		return AppResponse.success(
-			res,
-			data,
-			200,
-			"Successfully fetched permission!"
-		);
-	}
-);
+router.get("/:id", auth, caslAuthorize, async (req: Request, res: Response) => {
+	if (!req.ability?.can("manage", "Permission"))
+		throwError("Forbidden.", 403, []);
+	const id = +req.params.id;
+	const data = await PermissionServices.getById(id);
+	return AppResponse.success(
+		res,
+		data,
+		200,
+		"Successfully fetched permission!"
+	);
+});
 
 // Update
-router.put(
-	"/:id",
-	auth,
-	csrfProtection,
-	authorize(["permission:manage", "permission:update"]),
-	async (req: Request, res: Response) => {
-		const id = +req.params.id;
-		await PermissionServices.update(id, req.body);
-		const data = await PermissionServices.getById(id);
-		return AppResponse.success(
-			res,
-			data,
-			200,
-			"Successfully updated permission!"
-		);
-	}
-);
+router.put("/:id", auth, caslAuthorize, async (req: Request, res: Response) => {
+	const id = +req.params.id;
+	if (!req.ability?.can("manage", "Permission"))
+		throwError("Forbidden.", 403, []);
+	await PermissionServices.update(id, req.body);
+	const data = await PermissionServices.getById(id);
+	return AppResponse.success(
+		res,
+		data,
+		200,
+		"Successfully updated permission!"
+	);
+});
 
 // Delete multiple
 router.delete(
 	"/",
-	auth,
-	csrfProtection,
-	authorize(["permission:manage", "permission:delete"]),
 	validate({ body: multiDeleteSchema }),
+	auth,
+	caslAuthorize,
 	async (req: Request, res: Response) => {
+		if (!req.ability?.can("manage", "Permission"))
+			throwError("Forbidden.", 403, []);
 		const data = await PermissionServices.multiDelete(req.body.ids);
 		return AppResponse.success(
 			res,
@@ -101,10 +94,11 @@ router.delete(
 router.delete(
 	"/:id",
 	auth,
-	csrfProtection,
-	authorize(["permission:manage", "permission:delete"]),
+	caslAuthorize,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "Permission"))
+			throwError("Forbidden.", 403, []);
 		const data = await PermissionServices.delete(id);
 		return AppResponse.success(
 			res,

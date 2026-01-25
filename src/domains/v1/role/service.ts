@@ -63,14 +63,12 @@ export const RoleServices = {
 
 		return result;
 	},
-	getPermissions: async (id: number): Promise<any[]> => {
+	getPermissions: async (): Promise<any[]> => {
 		return await db
 			.select({
-				id: permissions.id,
-				name: permissions.name
+				id: permissions.id
 			})
 			.from(role_permissions)
-			.where(eq(role_permissions.roleId, id))
 			.leftJoin(
 				permissions,
 				eq(role_permissions.permissionId, permissions.id)

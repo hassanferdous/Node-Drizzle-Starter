@@ -39,3 +39,9 @@ export const userPermissionSchema = z.object({
 		z.number({ message: "Id is required" })
 	])
 });
+
+export const assignRoleSchema = z.object({
+	role: z
+		.array(z.number({ message: "Id is required" }))
+		.min(1, "At least 1 item required")
+});

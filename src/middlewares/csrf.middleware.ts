@@ -1,7 +1,7 @@
 import redis from "@/lib/redis";
 import { throwError } from "@/utils/error";
 import { NextFunction, Request, Response } from "express";
-import { Session } from "..";
+import { Session } from "../types";
 
 export default async function csrfProtection(
 	req: Request,

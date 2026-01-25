@@ -14,7 +14,8 @@
       "@middlewares/*": ["src/middlewares/*"],
       "@utils/*": ["src/utils/*"],
       "@db/*": ["src/db/*"]
-    }
+    },
+	 "typeRoots": ["./src/types", "./node_modules/@types"]
   },
   "include": ["src", "drizzle.config.ts"]
 }

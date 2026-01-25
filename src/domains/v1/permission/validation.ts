@@ -5,19 +5,27 @@ import { z } from "zod";
 export const createSchema = z.object({
 	permissions: z.union([
 		z.object({
-			name: z
-				.string({ message: "Name is required" })
-				.nonempty({ message: "Name is required" })
-				.max(255, { message: "Name is too long" }),
+			resource: z
+				.string({ message: "Resource is required" })
+				.nonempty({ message: "Resource is required" })
+				.max(255, { message: "Resource is too long" }),
+			action: z
+				.string({ message: "Action is required" })
+				.nonempty({ message: "Action is required" })
+				.max(255, { message: "Action is too long" }),
 			description: z.string().nullable().optional()
 		}),
 		z
 			.array(
 				z.object({
-					name: z
-						.string({ message: "Name is required" })
-						.nonempty({ message: "Name is required" })
-						.max(255, { message: "Name is too long" }),
+					resource: z
+						.string({ message: "Resource is required" })
+						.nonempty({ message: "Resource is required" })
+						.max(255, { message: "Resource is too long" }),
+					action: z
+						.string({ message: "Action is required" })
+						.nonempty({ message: "Action is required" })
+						.max(255, { message: "Action is too long" }),
 					description: z.string().nullable().optional()
 				})
 			)
@@ -27,10 +35,14 @@ export const createSchema = z.object({
 
 // Schema for updating a row
 export const updateSchema = z.object({
-	name: z
-		.string({ message: "Name is required" })
-		.nonempty("Name is required")
-		.max(255, "Name is too long"),
+	resource: z
+		.string({ message: "Resource is required" })
+		.nonempty("Resource is required")
+		.max(255, "Resource is too long"),
+	action: z
+		.string({ message: "Action is required" })
+		.nonempty("Action is required")
+		.max(255, "Action is too long"),
 	description: z.string().nullable().optional()
 });
 

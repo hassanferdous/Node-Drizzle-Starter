@@ -1,12 +1,13 @@
 import { idParamSchema } from "@/lib/common-zod-schema";
 import auth from "@/middlewares/auth.middleware";
-import authorize from "@/middlewares/authorize.middleware";
 import csrfProtection from "@/middlewares/csrf.middleware";
 import validate from "@/middlewares/validate.middleware";
 import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { RoleServices } from "./service";
 import { addPermissionSchema, createSchema } from "./validation";
+import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
+import { throwError } from "@/utils/error";
 
 const router = express.Router();
 
@@ -14,10 +15,12 @@ const router = express.Router();
 router.post(
 	"/",
 	auth,
-	csrfProtection,
-	authorize(["role:manage"]),
+	// csrfProtection,
+	caslAuthorize,
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
 		const data = await RoleServices.create(req.body);
 		return AppResponse.success(
 			res,
@@ -29,41 +32,30 @@ router.post(
 );
 
 // Read all
-router.get(
-	"/",
-	auth,
-	authorize(["role:manage"]),
-	async (req: Request, res: Response) => {
-		const data = await RoleServices.getAll();
-		return AppResponse.success(
-			res,
-			data,
-			200,
-			"Successfully fetched all role!"
-		);
-	}
-);
+router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
+	if (!req.ability?.can("manage", "Role")) throwError("Forbidden.", 403, []);
+	const data = await RoleServices.getAll();
+	return AppResponse.success(res, data, 200, "Successfully fetched all role!");
+});
 
 // Read one
-router.get(
-	"/:id",
-	auth,
-	authorize(["role:manage"]),
-	async (req: Request, res: Response) => {
-		const id = +req.params.id;
-		const data = await RoleServices.getById(id);
-		return AppResponse.success(res, data, 200, "Successfully fetched role!");
-	}
-);
+router.get("/:id", auth, caslAuthorize, async (req: Request, res: Response) => {
+	const id = +req.params.id;
+	if (!req.ability?.can("manage", "Role")) throwError("Forbidden.", 403, []);
+	const data = await RoleServices.getById(id);
+	return AppResponse.success(res, data, 200, "Successfully fetched role!");
+});
 
 // Update
 router.put(
 	"/:id",
+	validate({ body: createSchema, params: idParamSchema }),
 	auth,
-	csrfProtection,
-	authorize(["role:manage"]),
+	caslAuthorize,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
 		await RoleServices.update(id, req.body);
 		const data = await RoleServices.getById(id);
 		return AppResponse.success(res, data, 200, "Successfully updated role!");
@@ -73,11 +65,12 @@ router.put(
 // Delete
 router.delete(
 	"/:id",
+	validate({ params: idParamSchema }),
 	auth,
-	csrfProtection,
-	authorize(["role:manage"]),
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
 		const data = await RoleServices.delete(id);
 		return AppResponse.success(res, data, 200, "Successfully deleted role!");
 	}
@@ -87,12 +80,12 @@ router.delete(
 // Add permissions to a role
 router.post(
 	"/:id/permissions",
-	auth,
-	csrfProtection,
-	authorize(["role:manage"]),
 	validate({ body: addPermissionSchema, params: idParamSchema }),
+	auth,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
 		const data = await RoleServices.addPermissions(id, req.body.permissions);
 		return AppResponse.success(
 			res,
@@ -106,12 +99,13 @@ router.post(
 // Get permissions of a role
 router.get(
 	"/:id/permissions",
-	auth,
-	authorize(["role:manage"]),
 	validate({ params: idParamSchema }),
+	auth,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		const data = await RoleServices.getPermissions(id);
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
+		const data = await RoleServices.getPermissions();
 		return AppResponse.success(
 			res,
 			data,
@@ -124,12 +118,12 @@ router.get(
 // Remove specific permissions from a role
 router.delete(
 	"/:id/permissions",
-	auth,
-	csrfProtection,
-	authorize(["role:manage"]),
 	validate({ body: addPermissionSchema, params: idParamSchema }),
+	auth,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
 		await RoleServices.removePermissions(id, req.body.permissions);
 		return AppResponse.success(
 			res,
@@ -143,12 +137,12 @@ router.delete(
 // Remove ALL permissions from a role
 router.delete(
 	"/:id/permissions/all",
-	auth,
-	csrfProtection,
-	authorize(["role:manage"]),
 	validate({ params: idParamSchema }),
+	auth,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "Role"))
+			throwError("Forbidden.", 403, []);
 		await RoleServices.removeAllPermissions(id);
 		return AppResponse.success(
 			res,

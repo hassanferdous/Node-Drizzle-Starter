@@ -18,6 +18,8 @@ export const errorHandler = (
 		});
 	}
 
+	console.log(err);
+
 	// Check for PostgreSQL unique constraint violation
 	if (err?.cause?.code === "23505") {
 		return res.status(409).json({

@@ -1,8 +1,9 @@
 import { db } from "@/config/db";
 import {
-	deniedPermissions,
 	permissions,
-	userPermissions,
+	role_permissions,
+	roles,
+	user_roles,
 	usersTable,
 	userTokensTable
 } from "@/db/schema";
@@ -18,47 +19,11 @@ import {
 } from "drizzle-orm";
 import { NewRefreshToken } from "../auth/service";
 import { RoleServices } from "../role/service";
+import { AuthUser } from "@/types/index";
 
 export type User = Omit<InferSelectModel<typeof usersTable>, "password">;
 export type NewUser = InferInsertModel<typeof usersTable>;
-export type UserPermission = InferSelectModel<typeof userPermissions>;
-
-const insertUserPermissions = async (
-	table: typeof userPermissions | typeof deniedPermissions,
-	userId: number,
-	permissions: number | number[]
-) => {
-	const isMulti = Array.isArray(permissions);
-	const values = isMulti
-		? permissions.map((pId) => ({ userId, permissionId: pId }))
-		: [{ userId, permissionId: permissions }];
-
-	return await db
-		.insert(table)
-		.values(values)
-		.onConflictDoNothing()
-		.returning();
-};
-
-const deleteUserPermissions = async (
-	table: typeof userPermissions | typeof deniedPermissions,
-	userId: number,
-	permissions: number | number[]
-) => {
-	const isMulti = Array.isArray(permissions);
-
-	return await db
-		.delete(table)
-		.where(
-			and(
-				eq(table.userId, userId),
-				isMulti
-					? inArray(table.permissionId, permissions)
-					: eq(table.permissionId, permissions)
-			)
-		)
-		.returning();
-};
+export type Role = InferSelectModel<typeof roles>;
 
 export const UserServices = {
 	create: async (data: NewUser): Promise<Partial<User>> => {
@@ -75,7 +40,6 @@ export const UserServices = {
 				email: usersTable.email,
 				age: usersTable.age,
 				img: usersTable.img,
-				roleId: usersTable.roleId,
 				createdAt: usersTable.createdAt,
 				updatedAt: usersTable.updatedAt
 			});
@@ -91,7 +55,6 @@ export const UserServices = {
 				id: usersTable.id,
 				name: usersTable.name,
 				email: usersTable.email,
-				roleId: usersTable.roleId,
 				img: usersTable.img,
 				age: usersTable.age
 			})
@@ -101,28 +64,60 @@ export const UserServices = {
 		if (!user) return user;
 
 		if (populatePermissions) {
-			const permissions = await PermissionServices.getUserPermissions(
-				user,
-				true
-			);
+			const permissions = await PermissionServices.getUserPermissions();
 			return { ...user, permissions };
 		}
 		return { ...user };
 	},
 
-	getByEmail: async (email: string, populatePassword: boolean = false) => {
+	getByEmail: async (
+		email: string,
+		populatePassword: boolean = false
+	): Promise<Partial<AuthUser> | null> => {
 		const result = await db
 			.select({
 				name: usersTable.name,
 				email: usersTable.email,
 				id: usersTable.id,
-				roleId: usersTable.roleId,
 				provider: usersTable.provider,
-				...(populatePassword ? { password: usersTable.password } : {})
+				...(populatePassword ? { password: usersTable.password } : {}),
+				roleId: roles.id,
+				roleName: roles.name,
+				roleParentId: roles.parentId,
+				scopeType: user_roles.scopeType,
+				scopeId: user_roles.scopeId,
+				permissionId: role_permissions.permissionId,
+				resource: permissions.resource,
+				action: permissions.action,
+				description: permissions.description
 			})
 			.from(usersTable)
+			.leftJoin(user_roles, eq(usersTable.id, user_roles.userId))
+			.leftJoin(roles, eq(user_roles.roleId, roles.id))
+			.leftJoin(role_permissions, eq(roles.id, role_permissions.roleId))
+			.leftJoin(
+				permissions,
+				eq(role_permissions.permissionId, permissions.id)
+			)
 			.where(eq(usersTable.email, email));
-		return result[0] ?? null;
+		const user = result[0] ?? null;
+		const filteredData = result.filter((item) => !!item.roleId);
+		const userPermissions = filteredData
+			.filter((item) => !!item.permissionId)
+			.map((item) => ({
+				resource: item.resource!,
+				action: item.action!,
+				description: item.description
+			}));
+		const userRoles = filteredData.map((item) => ({
+			id: item.roleId,
+			name: item.roleName,
+			parentId: item.roleParentId,
+			scopeType: item.scopeType,
+			scopeId: item.scopeId
+		})) as unknown as Role[];
+		if (!user) return user;
+		return { ...user, roles: userRoles, permissions: userPermissions };
 	},
 
 	getAll: async (): Promise<Pick<User, "id" | "name" | "email">[]> => {
@@ -147,7 +142,6 @@ export const UserServices = {
 				id: usersTable.id,
 				name: usersTable.name,
 				email: usersTable.email,
-				roleId: usersTable.roleId,
 				img: usersTable.img,
 				age: usersTable.age
 			});
@@ -185,98 +179,38 @@ export const UserServices = {
 	getUserPermissions: async (userId: number) => {
 		const user = await UserServices.getById(userId, false);
 		if (!user) throwError("User not found", 400);
-		const permissions = PermissionServices.getUserPermissions({
-			id: user?.id as number,
-			roleId: user?.roleId as number
-		});
+		const permissions = PermissionServices.getUserPermissions();
 		return permissions;
 	},
 
 	// get User role permissions
 	getUserRolePermissions: async (userId: number) => {
 		const user = await db
-			.select({ roleId: usersTable.roleId })
+			.select({})
 			.from(usersTable)
 			.where(eq(usersTable.id, userId))
 			.limit(1)
 			.then((res) => res[0]);
 
 		if (!user) throwError("User not found", 400);
-		if (!user.roleId) return [];
-		const rolePerms = await RoleServices.getPermissions(user.roleId);
+		const rolePerms = await RoleServices.getPermissions();
 
 		return rolePerms;
 	},
 
-	// User's additioinal permissions
-	grantAdditionalPermission: async (
-		userId: number,
-		permission: number | number[]
-	) => {
-		const rolePermIds = await UserServices.getUserRolePermissions(userId);
-		const permissionArray = Array.isArray(permission)
-			? permission
-			: [permission];
-		const validToAdd = permissionArray.filter(
-			(p) => !rolePermIds.find((rP) => rP.permissionId === p)
-		);
-		if (!validToAdd.length) {
-			throwError(
-				"No valid permissions to add — already granted via role.",
-				403
-			);
-		}
-		return insertUserPermissions(userPermissions, userId, validToAdd);
-	},
-
-	getAdditionalPermission: async (userId: number) => {
-		const result = await db
-			.select({ permissionId: permissions.id, permission: permissions.name })
-			.from(userPermissions)
-			.leftJoin(
-				permissions,
-				eq(userPermissions.permissionId, permissions.id)
+	assignRole: async (userId: number, roleIds: number[]) => {
+		await db
+			.insert(user_roles)
+			.values(
+				roleIds.map((roleId) => ({
+					userId,
+					roleId,
+					scopeType: "global",
+					scopeId: null
+				}))
 			)
-			.where(eq(userPermissions.userId, userId));
-		return result;
-	},
-
-	deleteAdditionalPermission: (
-		userId: number,
-		permissions: number | number[]
-	) => {
-		return deleteUserPermissions(userPermissions, userId, permissions);
-	},
-
-	// User's denied deleteUserPermissions(userPermissions, userId, permissions)
-	deniedPermission: async (userId: number, permission: number | number[]) => {
-		const rolePermIds = await UserServices.getUserRolePermissions(userId);
-		const permissionArray = Array.isArray(permission)
-			? permission
-			: [permission];
-		const validToDeny = permissionArray.filter(
-			(p) => !rolePermIds.find((rP) => rP.permissionId === p)
-		);
-		if (validToDeny.length) {
-			return insertUserPermissions(deniedPermissions, userId, permission);
-		}
-		throwError(
-			"No valid permissions to deny. only role permissions can be denied",
-			403
-		);
-	},
-	getDeniedPermission: async (userId: number) => {
-		const result = db
-			.select({ permissionId: permissions.id, permission: permissions.name })
-			.from(deniedPermissions)
-			.leftJoin(
-				permissions,
-				eq(deniedPermissions.permissionId, permissions.id)
-			)
-			.where(eq(deniedPermissions.userId, userId));
-		return result;
-	},
-	deleteDeniedPermission: (userId: number, permissions: number | number[]) => {
-		return deleteUserPermissions(deniedPermissions, userId, permissions);
+			.onConflictDoNothing({
+				target: [user_roles.userId, user_roles.roleId]
+			});
 	}
 };

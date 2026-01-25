@@ -1,10 +1,5 @@
 import { db } from "@/config/db";
-import {
-	deniedPermissions,
-	permissions,
-	role_permissions,
-	userPermissions
-} from "@/db/schema";
+import { permissions, role_permissions } from "@/db/schema";
 import { eq, inArray, InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 export type Permission = InferSelectModel<typeof permissions>;
@@ -71,71 +66,7 @@ export const PermissionServices = {
 	},
 
 	// get logged in user's permission
-	getUserPermissions: async (
-		user: { roleId: number | null; id: number },
-		withId: boolean = false
-	) => {
-		const rolePerms = await db
-			.select({
-				id: permissions.id,
-				name: permissions.name
-			})
-			.from(role_permissions)
-			.leftJoin(
-				permissions,
-				eq(role_permissions.permissionId, permissions.id)
-			)
-			.where(eq(role_permissions.roleId, user?.roleId as number));
-
-		const userPerms = await db
-			.select({
-				id: permissions.id,
-				name: permissions.name
-			})
-			.from(userPermissions)
-			.leftJoin(
-				permissions,
-				eq(permissions.id, userPermissions.permissionId)
-			)
-			.where(eq(userPermissions.userId, user?.id));
-
-		const deniedPerms = await db
-			.select({
-				id: permissions.id,
-				name: permissions.name
-			})
-			.from(permissions)
-			.leftJoin(
-				deniedPermissions,
-				eq(permissions.id, deniedPermissions.permissionId)
-			)
-			.where(eq(deniedPermissions.userId, user?.id));
-
-		const _rolePermissions = rolePerms.map((p) => ({
-			id: p.id,
-			name: p.name
-		}));
-		const _userPermissions = userPerms.map((p) => ({
-			id: p.id,
-			name: p.name
-		}));
-		const _deniedPermissionsSet = new Set(deniedPerms.map((p) => p.name));
-
-		const merged = [..._rolePermissions, ..._userPermissions];
-
-		const uniquePermissionsMap = new Map();
-		for (const perm of merged) {
-			if (!uniquePermissionsMap.has(perm.name)) {
-				uniquePermissionsMap.set(perm.name, perm);
-			}
-		}
-
-		const allowedPermissions = Array.from(
-			uniquePermissionsMap.values()
-		).filter((perm) => !_deniedPermissionsSet.has(perm.name));
-
-		return withId
-			? allowedPermissions // [{ id, name }]
-			: allowedPermissions.map((p) => p.name); // ['permission1', 'permission2']
+	getUserPermissions: async () => {
+		return [];
 	}
 };

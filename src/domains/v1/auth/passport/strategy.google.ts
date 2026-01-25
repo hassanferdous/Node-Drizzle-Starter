@@ -15,6 +15,7 @@ passport.use(
 				const user = await UserServices.getByEmail(
 					profile._json.email as string
 				);
+
 				if (user) return cb(null, user);
 				const newUser = await UserServices.create({
 					name: profile._json.name,
@@ -27,7 +28,6 @@ passport.use(
 					name: newUser.name,
 					email: newUser.email,
 					id: newUser.id,
-					roleId: newUser.roleId,
 					provider: newUser.provider
 				});
 			} catch (err) {

@@ -15,36 +15,37 @@ import {
 import { hashedPassword } from "@/utils/password-hash";
 import { AppResponse } from "@/utils/response";
 import { PermissionServices } from "@domains/v1/permission/service";
-import { UserServices } from "@domains/v1/user/service";
+import { Role, UserServices } from "@domains/v1/user/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "../user/service";
+import { AuthUser } from "@/types/index";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
-export async function createSession(user: User) {
-	const permissions = await PermissionServices.getUserPermissions(user);
-	const sid = `session:user:${user?.id}`;
+export async function createSession(user: AuthUser) {
+	const permissions = await PermissionServices.getUserPermissions();
+	const sid = `session:user:${user.id}`;
 	const csrf = uuidv4();
 	await redis.set(
 		sid,
-		JSON.stringify({ csrf, permissions, userId: user.id }),
+		JSON.stringify({ csrf, permissions, userId: user.id, roles: user.roles }),
 		"EX",
 		parseInt(config.auth.accessTokenDuration)
 	);
-	return { csrf, permissions, sid };
+	return { csrf, permissions, sid, roles: user.roles };
 }
 
 // Generate access token
-async function generateUserTokens(user: User) {
+async function generateUserTokens(user: AuthUser) {
 	const { csrf, sid } = await createSession(user);
 
 	const tokens = generateAuthTokens({
-		user: { id: user.id, email: user.email, roleId: user.roleId },
+		user: { id: user.id, email: user.email },
 		sid: sid
 	});
 
@@ -56,7 +57,12 @@ async function generateUserTokens(user: User) {
 	});
 
 	const data = {
-		user: { id: user.id, email: user.email, roleId: user.roleId },
+		user: {
+			id: user.id,
+			email: user.email,
+			roles: user.roles,
+			permissions: user.permissions
+		},
 		...tokens,
 		csrf
 	};
@@ -65,7 +71,7 @@ async function generateUserTokens(user: User) {
 }
 
 // Generate one time code and return redirect url
-async function generateOneTimeCode(user: User) {
+async function generateOneTimeCode(user: AuthUser) {
 	const { data, tokens } = await generateUserTokens(user);
 	const oneTimeCode = uuidv4();
 	const cacheKey = `auth:code:${oneTimeCode}`;
@@ -83,7 +89,7 @@ export const AuthServices = {
 		passport.authenticate(
 			"local",
 			{ session: false },
-			async (err: any, user: User, info: any) => {
+			async (err: any, user: AuthUser, info: any) => {
 				if (err || !user) next(new AppError("Invalid credentials", 401));
 				const { data, tokens } = await generateUserTokens(user);
 				setAuthCookies(res, tokens as TokenOptions);
@@ -97,7 +103,7 @@ export const AuthServices = {
 		passport.authenticate(
 			"google",
 			{ session: false },
-			async (err, user: User, info) => {
+			async (err, user: AuthUser, info) => {
 				if (err) return next(err);
 				if (!user) return res.redirect("/login?error=OAuthFailed");
 				const { tokens, redirectUrl } = await generateOneTimeCode(user);
@@ -120,7 +126,7 @@ export const AuthServices = {
 		if (!refresh_token) return throwError("Malformed refresh token", 401);
 		try {
 			const decodeded = verifyAuthTokens(token, "refresh") as JwtPayload & {
-				user: User;
+				user: AuthUser;
 			};
 			if (decodeded.exp! > Date.now())
 				return throwError("Invalid Token", 401);
@@ -167,11 +173,10 @@ export const AuthServices = {
 				id: usersTable.id,
 				email: usersTable.email,
 				name: usersTable.name,
-				img: usersTable.img,
-				roleId: usersTable.roleId
+				img: usersTable.img
 			});
 
-		return AppResponse.success(res, result);
+		return AppResponse.success(res, result[0]);
 	},
 
 	forgotPassword: async (req: Request, res: Response) => {
@@ -213,8 +218,8 @@ export const AuthServices = {
 	verifyOTPHandler: async (req: Request, res: Response) => {
 		const { email, otp } = req.body;
 		const user = await UserServices.getByEmail(email);
-		if (!user) throwError("Invalid OTP or User doesn't exist");
-		const isValid = await verifyOTP(user.id, otp);
+		if (!user) return throwError("Invalid OTP or User doesn't exist");
+		const isValid = await verifyOTP(user.id!, otp);
 
 		if (!isValid) throwError("Invalid OTP");
 		const resetToken = generateToken(
