@@ -1,4 +1,5 @@
 import {
+	boolean,
 	foreignKey,
 	integer,
 	pgTable,
@@ -36,9 +37,11 @@ export const roles = pgTable(
 // --------------------
 export const permissions = pgTable("permissions", {
 	id: serial().primaryKey(),
-	resource: text().notNull(), // e.g., "course", "lesson", "quiz"
+	subject: text().notNull(), // e.g., "course", "lesson", "quiz"
 	action: text().notNull(), // e.g., "create", "update", "submit"
+	conditions: text(),
 	description: text(),
+	inverted: boolean().default(false),
 	...timestampColumns
 });
 

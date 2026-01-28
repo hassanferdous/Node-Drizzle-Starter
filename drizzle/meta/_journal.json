@@ -8,6 +8,20 @@
       "when": 1769259252770,
       "tag": "0000_keen_forge",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769351602638,
+      "tag": "0001_faithful_marvel_apes",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769489787036,
+      "tag": "0002_overconfident_skaar",
+      "breakpoints": true
     }
   ]
 }

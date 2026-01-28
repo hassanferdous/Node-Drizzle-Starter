@@ -1,30 +1,23 @@
 import { Request } from "express";
 import { Role, User } from "../domains/v1/user/service";
-import { AbilityTuple, MongoQuery } from "@casl/ability";
-export type Permssion = {
-	resource: string;
-	action: string;
-	description: string | null;
-};
+import { AbilityTuple, MongoQuery, RawRuleOf } from "@casl/ability";
+import { AppAbility } from "@/abilities/app.ability";
+
 export type AuthSession = {
 	csrf: string;
-	permissions: Permssion[];
+	permissions: RawRuleOf<AppAbility>[];
 	roles: Role[];
 	user: AuthUser;
+};
+
+export type AuthUser = User & {
+	permissions: RawRuleOf<AppAbility>[];
+	roles: Role[];
+	sid: string;
 };
 
 export type CaslAbility = MongoAbility<AbilityTuple, MongoQuery>;
 
 export type AuthTokenPayload = {
 	user: AuthUser;
-};
-
-export type AuthUser = User & {
-	permissions: Permssion[];
-	roles: Role[];
-	sid: string;
-};
-
-export type AuthorizedRequest = Request & {
-	ability: CaslAbility;
 };

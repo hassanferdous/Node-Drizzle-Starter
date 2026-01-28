@@ -1,7 +1,7 @@
 import redis from "@/lib/redis";
 import { throwError } from "@/utils/error";
 import { NextFunction, Request, Response } from "express";
-import { Session } from "../types";
+import { AuthSession } from "../types";
 
 export default async function csrfProtection(
 	req: Request,
@@ -15,7 +15,7 @@ export default async function csrfProtection(
 	// Check if the csrf token is valid and present
 	const cached = await redis.get(user?.sid);
 	if (!cached) return throwError("Session expired", 403);
-	const session = JSON.parse(cached) as Session;
+	const session = JSON.parse(cached) as AuthSession;
 	if (session.csrf !== _req.csrf) return throwError("Invalid CSRF token", 403);
 	next();
 }

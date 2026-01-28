@@ -10,12 +10,7 @@ import { throwError } from "@/utils/error";
 import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { UserServices } from "./service";
-import {
-	assignRoleSchema,
-	createSchema,
-	updateSchema,
-	userPermissionSchema
-} from "./validation";
+import { assignRoleSchema, createSchema, updateSchema } from "./validation";
 
 const router = express.Router();
 
@@ -27,6 +22,8 @@ router.post(
 	caslAuthorize,
 	validate({ body: createSchema }),
 	async (req: Request, res: Response) => {
+		if (!req.ability?.can("create", "User"))
+			throwError("Forbidden.", 403, []);
 		const data = await UserServices.create(req.body);
 		return AppResponse.success(
 			res,
@@ -39,7 +36,7 @@ router.post(
 
 // Read all
 router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
-	if (!req.ability?.can("list", "User")) throwError("Forbidden.", 403, []);
+	if (!req.ability?.can("read", req.user)) throwError("Forbidden.", 403, []);
 	const data = await UserServices.getAll();
 	return AppResponse.success(res, data, 200, "Successfully fetched all user!");
 });
@@ -50,9 +47,14 @@ router.get(
 	auth,
 	caslAuthorize,
 	async (req: Request, res: Response) => {
-		const user = req.user as { id: number };
-		if (!req.ability?.can("read", { resource: "User", id: user.id }))
+		if (
+			!req.ability?.can("read", {
+				...req.user,
+				subjectType: "User"
+			})
+		)
 			throwError("Forbidden.", 403, []);
+		const user = req.user as { id: number };
 		const data = await UserServices.getById(user.id);
 		return AppResponse.success(
 			res,
@@ -71,7 +73,12 @@ router.get(
 	caslAuthorize,
 	async (req: Request & { ability?: CaslAbility }, res: Response) => {
 		const id = +req.params.id;
-		if (!req.ability?.can("read", { resource: "User", id }))
+		if (
+			!req.ability?.can("read", {
+				id: id,
+				subjectType: "User"
+			})
+		)
 			throwError("Forbidden.", 403, []);
 		const data = await UserServices.getById(id);
 		return AppResponse.success(res, data, 200, "Successfully fetched user!");
@@ -85,9 +92,14 @@ router.put(
 	auth,
 	caslAuthorize,
 	csrfProtection,
-	async (req: Request & { ability?: CaslAbility }, res: Response) => {
+	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		if (!req.ability?.can("update", { resource: "User", id }))
+		if (
+			!req.ability?.can("update", {
+				id: id,
+				subjectType: "User"
+			})
+		)
 			throwError("Forbidden.", 403, []);
 		const data = await UserServices.update(id, req.body);
 		return AppResponse.success(res, data, 200, "Successfully updated user!");
@@ -101,9 +113,14 @@ router.delete(
 	auth,
 	caslAuthorize,
 	csrfProtection,
-	async (req: Request & { ability?: CaslAbility }, res: Response) => {
+	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		if (!req.ability?.can("delete", { resource: "User", id }))
+		if (
+			!req.ability?.can("delete", {
+				id: id,
+				subjectType: "User"
+			})
+		)
 			throwError("Forbidden.", 403, []);
 		const data = await UserServices.delete(id);
 		return AppResponse.success(res, data, 200, "Successfully deleted user!");
@@ -118,6 +135,8 @@ router.get(
 	caslAuthorize,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
+		if (!req.ability?.can("manage", "User"))
+			throwError("Forbidden.", 403, []);
 		const data = await UserServices.getUserRolePermissions(id);
 		return AppResponse.success(
 			res,
@@ -129,39 +148,6 @@ router.get(
 );
 
 /************ User denied permissions  *********/
-router.post(
-	"/:id/denied-permissions",
-	auth,
-	csrfProtection,
-	validate({ body: userPermissionSchema, params: idParamSchema }),
-	async (req: Request, res: Response) => {
-		const id = +req.params.id;
-		const data: any = [];
-		return AppResponse.success(
-			res,
-			data,
-			200,
-			"Successfully denied role permissions!"
-		);
-	}
-);
-
-router.delete(
-	"/:id/denied-permissions",
-	auth,
-	csrfProtection,
-	validate({ body: userPermissionSchema, params: idParamSchema }),
-	async (req: Request, res: Response) => {
-		const id = +req.params.id;
-		const data: any = {};
-		return AppResponse.success(
-			res,
-			data,
-			200,
-			"Successfully deleted denied permissions!"
-		);
-	}
-);
 
 router.post(
 	"/:id/assign-role",
@@ -170,6 +156,8 @@ router.post(
 	caslAuthorize,
 	// csrfProtection,
 	async (req: Request, res: Response) => {
+		if (!req.ability?.can("manage", "User"))
+			throwError("Forbidden.", 403, []);
 		const id = +req.params.id;
 		const values = req.body.role.map((role: number) => ({
 			userId: id,
@@ -177,8 +165,6 @@ router.post(
 			scopeType: "global",
 			scopeId: null
 		}));
-		if (!req.ability?.can("manage", "User"))
-			throwError("Forbidden.", 403, []);
 		await db.insert(user_roles).values(values);
 		return AppResponse.success(res, [], 200, "Successfully assigned role!");
 	}

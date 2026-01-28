@@ -33,7 +33,7 @@ router.post(
 
 // Read all
 router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
-	if (!req.ability?.can("manage", "Role")) throwError("Forbidden.", 403, []);
+	// if (!req.ability?.can("manage", "Role")) throwError("Forbidden.", 403, []);
 	const data = await RoleServices.getAll();
 	return AppResponse.success(res, data, 200, "Successfully fetched all role!");
 });

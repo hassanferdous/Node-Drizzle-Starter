@@ -14,6 +14,7 @@ export default function auth(req: Request, res: Response, next: NextFunction) {
 		const decoded = verifyAuthTokens(access_token, "access") as JwtPayload;
 		const _req = req as Request & { csrf?: string; _isCookies: boolean };
 		_req.user = { ...decoded.user, sid: decoded.sid };
+
 		_req._isCookies = _isCookies;
 		// Accept CSRF token from header or body
 		const csrfHeader = headers["x-csrf-token"];

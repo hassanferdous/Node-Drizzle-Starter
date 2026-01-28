@@ -1,12 +1,11 @@
 import auth from "@/middlewares/auth.middleware";
-import csrfProtection from "@/middlewares/csrf.middleware";
+import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
 import validate from "@/middlewares/validate.middleware";
+import { throwError } from "@/utils/error";
 import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { PermissionServices } from "./service";
 import { createSchema, multiDeleteSchema } from "./validation";
-import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
-import { throwError } from "@/utils/error";
 
 const router = express.Router();
 

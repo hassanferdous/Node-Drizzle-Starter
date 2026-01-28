@@ -1,25 +1,13 @@
+import { AppAbility } from "@/abilities/app.ability";
 import { db } from "@/config/db";
-import {
-	permissions,
-	role_permissions,
-	roles,
-	user_roles,
-	usersTable,
-	userTokensTable
-} from "@/db/schema";
+import { roles, user_roles, usersTable, userTokensTable } from "@/db/schema";
+import { AuthUser } from "@/types/index";
 import { throwError } from "@/utils/error";
+import { RawRuleOf } from "@casl/ability";
 import { PermissionServices } from "@domains/v1/permission/service";
 import bcrypt from "bcryptjs";
-import {
-	and,
-	eq,
-	inArray,
-	InferInsertModel,
-	InferSelectModel
-} from "drizzle-orm";
+import { eq, InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
 import { NewRefreshToken } from "../auth/service";
-import { RoleServices } from "../role/service";
-import { AuthUser } from "@/types/index";
 
 export type User = Omit<InferSelectModel<typeof usersTable>, "password">;
 export type NewUser = InferInsertModel<typeof usersTable>;
@@ -49,7 +37,7 @@ export const UserServices = {
 	getById: async (
 		id: number,
 		populatePermissions: boolean = true
-	): Promise<Partial<User & { permissions?: string[] }> | null> => {
+	): Promise<Partial<AuthUser> | null> => {
 		const result = await db
 			.select({
 				id: usersTable.id,
@@ -74,50 +62,81 @@ export const UserServices = {
 		email: string,
 		populatePassword: boolean = false
 	): Promise<Partial<AuthUser> | null> => {
-		const result = await db
+		const user = await db
 			.select({
+				id: usersTable.id,
 				name: usersTable.name,
 				email: usersTable.email,
-				id: usersTable.id,
+				img: usersTable.img,
+				age: usersTable.age,
 				provider: usersTable.provider,
-				...(populatePassword ? { password: usersTable.password } : {}),
-				roleId: roles.id,
-				roleName: roles.name,
-				roleParentId: roles.parentId,
-				scopeType: user_roles.scopeType,
-				scopeId: user_roles.scopeId,
-				permissionId: role_permissions.permissionId,
-				resource: permissions.resource,
-				action: permissions.action,
-				description: permissions.description
+				...(populatePassword ? { password: usersTable.password } : {})
 			})
 			.from(usersTable)
-			.leftJoin(user_roles, eq(usersTable.id, user_roles.userId))
-			.leftJoin(roles, eq(user_roles.roleId, roles.id))
-			.leftJoin(role_permissions, eq(roles.id, role_permissions.roleId))
-			.leftJoin(
-				permissions,
-				eq(role_permissions.permissionId, permissions.id)
-			)
-			.where(eq(usersTable.email, email));
-		const user = result[0] ?? null;
-		const filteredData = result.filter((item) => !!item.roleId);
-		const userPermissions = filteredData
-			.filter((item) => !!item.permissionId)
+			.where(eq(usersTable.email, email))
+			.limit(1)
+			.then((res) => res[0]);
+		if (!user) return null;
+		const userRolePermissions = await UserServices.getUserRolePermissions(
+			user.id
+		);
+		return {
+			...user,
+			permissions: userRolePermissions.permissions,
+			roles: userRolePermissions.roles
+		};
+	},
+
+	getUserRolePermissions: async (
+		id: number
+	): Promise<{ roles: Role[]; permissions: RawRuleOf<AppAbility>[] }> => {
+		const query = await db.execute(sql`with recursive
+													role_tree as (
+														select
+															r.id,
+															r.parent_id,
+															r.name
+														from
+															roles r
+															inner join user_roles ur on r.id = ur.role_id
+														where
+															ur.user_id = ${id}
+														union all
+														select
+															parent.id,
+															parent.parent_id,
+															parent.name
+														from
+															roles parent
+															inner join role_tree rt on rt.id = parent.parent_id
+													)
+												select
+													role_tree.id as role_id,
+													role_tree.name as role_name,
+													p.subject,
+													p.action,
+													p.conditions,
+													p.description,
+													p.id as permission_id
+												from
+													role_tree
+													left join role_permissions rp on role_tree.id = rp.role_id
+													left join permissions p on p.id = rp.permission_id;`);
+		const roles = query.rows.map((item) => ({
+			id: item.role_id,
+			name: item.role_name
+		})) as Role[];
+		const permissions = query.rows
+			.filter((item) => item.permission_id)
 			.map((item) => ({
-				resource: item.resource!,
-				action: item.action!,
-				description: item.description
-			}));
-		const userRoles = filteredData.map((item) => ({
-			id: item.roleId,
-			name: item.roleName,
-			parentId: item.roleParentId,
-			scopeType: item.scopeType,
-			scopeId: item.scopeId
-		})) as unknown as Role[];
-		if (!user) return user;
-		return { ...user, roles: userRoles, permissions: userPermissions };
+				id: item.permission_id,
+				subject: item.subject,
+				action: item.action,
+				conditions: item.conditions,
+				description: item.description,
+				inverted: item.inverted
+			})) as RawRuleOf<AppAbility>[];
+		return { roles, permissions };
 	},
 
 	getAll: async (): Promise<Pick<User, "id" | "name" | "email">[]> => {
@@ -181,21 +200,6 @@ export const UserServices = {
 		if (!user) throwError("User not found", 400);
 		const permissions = PermissionServices.getUserPermissions();
 		return permissions;
-	},
-
-	// get User role permissions
-	getUserRolePermissions: async (userId: number) => {
-		const user = await db
-			.select({})
-			.from(usersTable)
-			.where(eq(usersTable.id, userId))
-			.limit(1)
-			.then((res) => res[0]);
-
-		if (!user) throwError("User not found", 400);
-		const rolePerms = await RoleServices.getPermissions();
-
-		return rolePerms;
 	},
 
 	assignRole: async (userId: number, roleIds: number[]) => {

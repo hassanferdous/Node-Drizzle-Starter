@@ -4,6 +4,7 @@ import { usersTable, userTokensTable } from "@/db/schema";
 import { generateOTP, verifyOTP } from "@/lib/otp";
 import redis from "@/lib/redis";
 import { emailWorker } from "@/queues/email";
+import { AuthUser } from "@/types/index";
 import { clearAuthCookies, setAuthCookies, TokenOptions } from "@/utils/cookie";
 import { AppError, throwError } from "@/utils/error";
 import {
@@ -14,35 +15,46 @@ import {
 } from "@/utils/jwt";
 import { hashedPassword } from "@/utils/password-hash";
 import { AppResponse } from "@/utils/response";
-import { PermissionServices } from "@domains/v1/permission/service";
-import { Role, UserServices } from "@domains/v1/user/service";
+import { UserServices } from "@domains/v1/user/service";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "../user/service";
-import { AuthUser } from "@/types/index";
+import { interpolate } from "@/utils/interpolate";
 
 export type UserRefreshToken = InferSelectModel<typeof userTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof userTokensTable>;
 
-export async function createSession(user: AuthUser) {
-	const permissions = await PermissionServices.getUserPermissions();
-	const sid = `session:user:${user.id}`;
+export async function createSession(authUser: AuthUser) {
+	const sid = `session:user:${authUser.id}`;
+	let { permissions, roles, ...user } = authUser;
 	const csrf = uuidv4();
+	permissions = permissions.map((permission) => ({
+		...permission,
+		conditions: interpolate(permission.conditions as unknown as string, {
+			user
+		})
+	}));
 	await redis.set(
 		sid,
-		JSON.stringify({ csrf, permissions, userId: user.id, roles: user.roles }),
+		JSON.stringify({
+			csrf,
+			permissions,
+			userId: user.id,
+			roles
+		}),
 		"EX",
 		parseInt(config.auth.accessTokenDuration)
 	);
-	return { csrf, permissions, sid, roles: user.roles };
+	return { csrf, permissions, sid, roles, user };
 }
 
 // Generate access token
-async function generateUserTokens(user: AuthUser) {
-	const { csrf, sid } = await createSession(user);
+async function generateUserTokens(authUser: AuthUser) {
+	const { csrf, sid, permissions, roles, user } =
+		await createSession(authUser);
 
 	const tokens = generateAuthTokens({
 		user: { id: user.id, email: user.email },
@@ -60,8 +72,8 @@ async function generateUserTokens(user: AuthUser) {
 		user: {
 			id: user.id,
 			email: user.email,
-			roles: user.roles,
-			permissions: user.permissions
+			roles,
+			permissions
 		},
 		...tokens,
 		csrf
