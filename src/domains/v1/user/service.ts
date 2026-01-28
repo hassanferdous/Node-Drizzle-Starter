@@ -117,15 +117,15 @@ export const UserServices = {
 													p.action,
 													p.conditions,
 													p.description,
-													p.id as permission_id
+													p.id as permission_id,
+													p.inverted
 												from
 													role_tree
 													left join role_permissions rp on role_tree.id = rp.role_id
-													left join permissions p on p.id = rp.permission_id;`);
-		const roles = query.rows.map((item) => ({
-			id: item.role_id,
-			name: item.role_name
-		})) as Role[];
+													left join permissions p on p.id = rp.permission_id where p.inverted = false;`);
+		const roles = [
+			...new Set(query.rows.map((item) => item.role_name))
+		] as Role[];
 		const permissions = query.rows
 			.filter((item) => item.permission_id)
 			.map((item) => ({

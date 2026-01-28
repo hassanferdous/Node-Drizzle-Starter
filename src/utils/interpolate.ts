@@ -11,7 +11,7 @@ function getByPath<T extends object>(obj: T, path: string): Primitive {
 }
 
 function extractExpressions(template: string): string[] {
-	return [...template.matchAll(/\$\{([^}]+)\}/g)].map((match) => match[1]);
+	return [...template?.matchAll(/\$\{([^}]+)\}/g)].map((match) => match[1]);
 }
 
 type InterpolatedResult = Record<string, Primitive>;
@@ -20,6 +20,7 @@ export function interpolate<T extends object>(
 	template: string,
 	vars: T
 ): InterpolatedResult {
+	if (!template) return {};
 	const expressions = extractExpressions(template);
 	const result: InterpolatedResult = {};
 
@@ -29,6 +30,7 @@ export function interpolate<T extends object>(
 		if (value === undefined) continue;
 
 		const lastKey = expr.split(".").pop()!;
+
 		result[lastKey] = value;
 	}
 

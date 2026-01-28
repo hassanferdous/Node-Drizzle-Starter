@@ -1,13 +1,12 @@
 import { idParamSchema } from "@/lib/common-zod-schema";
 import auth from "@/middlewares/auth.middleware";
-import csrfProtection from "@/middlewares/csrf.middleware";
+import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
 import validate from "@/middlewares/validate.middleware";
+import { throwError } from "@/utils/error";
 import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
 import { RoleServices } from "./service";
 import { addPermissionSchema, createSchema } from "./validation";
-import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
-import { throwError } from "@/utils/error";
 
 const router = express.Router();
 
@@ -33,7 +32,8 @@ router.post(
 
 // Read all
 router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
-	// if (!req.ability?.can("manage", "Role")) throwError("Forbidden.", 403, []);
+	if (!req.ability?.can("manage", "Role")) throwError("Forbidden.", 403, []);
+	console.log("show all roles");
 	const data = await RoleServices.getAll();
 	return AppResponse.success(res, data, 200, "Successfully fetched all role!");
 });
@@ -82,6 +82,7 @@ router.post(
 	"/:id/permissions",
 	validate({ body: addPermissionSchema, params: idParamSchema }),
 	auth,
+	caslAuthorize,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		if (!req.ability?.can("manage", "Role"))

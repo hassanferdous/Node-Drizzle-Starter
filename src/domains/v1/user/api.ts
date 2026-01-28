@@ -17,10 +17,9 @@ const router = express.Router();
 // Create
 router.post(
 	"/",
-	auth,
-	csrfProtection,
-	caslAuthorize,
 	validate({ body: createSchema }),
+	auth,
+	caslAuthorize,
 	async (req: Request, res: Response) => {
 		if (!req.ability?.can("create", "User"))
 			throwError("Forbidden.", 403, []);
@@ -36,7 +35,7 @@ router.post(
 
 // Read all
 router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
-	if (!req.ability?.can("read", req.user)) throwError("Forbidden.", 403, []);
+	if (req.ability?.cannot("list", "User")) throwError("Forbidden.", 403, []);
 	const data = await UserServices.getAll();
 	return AppResponse.success(res, data, 200, "Successfully fetched all user!");
 });

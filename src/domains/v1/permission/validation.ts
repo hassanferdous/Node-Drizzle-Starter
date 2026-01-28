@@ -13,8 +13,8 @@ export const createSchema = z.object({
 				.string({ message: "Action is required" })
 				.nonempty({ message: "Action is required" })
 				.max(255, { message: "Action is too long" }),
-			conditions: z.string().optional(),
-			inverted: z.boolean().optional(),
+			conditions: z.string().nullable().optional(),
+			inverted: z.boolean().nullable().optional(),
 			description: z.string().nullable().optional()
 		}),
 		z
@@ -28,8 +28,8 @@ export const createSchema = z.object({
 						.string({ message: "Action is required" })
 						.nonempty({ message: "Action is required" })
 						.max(255, { message: "Action is too long" }),
-					conditions: z.string().optional(),
-					inverted: z.boolean().optional(),
+					conditions: z.string().nullable().optional(),
+					inverted: z.boolean().nullable().optional(),
 					description: z.string().nullable().optional()
 				})
 			)
