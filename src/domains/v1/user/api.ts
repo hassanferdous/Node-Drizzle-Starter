@@ -5,7 +5,6 @@ import auth from "@/middlewares/auth.middleware";
 import { caslAuthorize } from "@/middlewares/casl-authorize.middleware";
 import csrfProtection from "@/middlewares/csrf.middleware";
 import validate from "@/middlewares/validate.middleware";
-import { CaslAbility } from "@/types/index";
 import { throwError } from "@/utils/error";
 import { AppResponse } from "@/utils/response";
 import express, { Request, Response } from "express";
@@ -35,7 +34,7 @@ router.post(
 
 // Read all
 router.get("/", auth, caslAuthorize, async (req: Request, res: Response) => {
-	if (req.ability?.cannot("list", "User")) throwError("Forbidden.", 403, []);
+	if (!req.ability?.can("read", "User")) throwError("Forbidden.", 403, []);
 	const data = await UserServices.getAll();
 	return AppResponse.success(res, data, 200, "Successfully fetched all user!");
 });
@@ -67,10 +66,10 @@ router.get(
 // Read one
 router.get(
 	"/:id",
-	auth,
 	validate({ params: idParamSchema }),
+	auth,
 	caslAuthorize,
-	async (req: Request & { ability?: CaslAbility }, res: Response) => {
+	async (req: Request, res: Response) => {
 		const id = +req.params.id;
 		if (
 			!req.ability?.can("read", {
@@ -114,15 +113,36 @@ router.delete(
 	csrfProtection,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		if (
-			!req.ability?.can("delete", {
-				id: id,
-				subjectType: "User"
-			})
-		)
+		if (!req.ability?.can("delete", "User"))
 			throwError("Forbidden.", 403, []);
 		const data = await UserServices.delete(id);
 		return AppResponse.success(res, data, 200, "Successfully deleted user!");
+	}
+);
+
+/************ Assign role to user  *********/
+router.post(
+	"/:id/assign-role",
+	validate({ body: assignRoleSchema, params: idParamSchema }),
+	auth,
+	caslAuthorize,
+	// csrfProtection,
+	async (req: Request, res: Response) => {
+		if (!req.ability?.can("update", "User"))
+			throwError(
+				"Forbidden. You don't have permission to assign role.",
+				403,
+				[]
+			);
+		const id = +req.params.id;
+		const values = req.body.role.map((role: number) => ({
+			userId: id,
+			roleId: role,
+			scopeType: "global",
+			scopeId: null
+		}));
+		await db.insert(user_roles).values(values);
+		return AppResponse.success(res, [], 200, "Successfully assigned role!");
 	}
 );
 
@@ -134,38 +154,19 @@ router.get(
 	caslAuthorize,
 	async (req: Request, res: Response) => {
 		const id = +req.params.id;
-		if (!req.ability?.can("manage", "User"))
-			throwError("Forbidden.", 403, []);
+		if (!req.ability?.can("read", "User"))
+			throwError(
+				"Forbidden. You don't have permission to get role permissions.",
+				403,
+				[]
+			);
 		const data = await UserServices.getUserRolePermissions(id);
 		return AppResponse.success(
 			res,
 			data,
 			200,
-			"Successfully fetched user's role-permissions'!"
+			"Successfully fetched user's role-permissions!"
 		);
-	}
-);
-
-/************ User denied permissions  *********/
-
-router.post(
-	"/:id/assign-role",
-	validate({ body: assignRoleSchema, params: idParamSchema }),
-	auth,
-	caslAuthorize,
-	// csrfProtection,
-	async (req: Request, res: Response) => {
-		if (!req.ability?.can("manage", "User"))
-			throwError("Forbidden.", 403, []);
-		const id = +req.params.id;
-		const values = req.body.role.map((role: number) => ({
-			userId: id,
-			roleId: role,
-			scopeType: "global",
-			scopeId: null
-		}));
-		await db.insert(user_roles).values(values);
-		return AppResponse.success(res, [], 200, "Successfully assigned role!");
 	}
 );
 

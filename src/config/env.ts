@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { z } from "zod";
 import path from "path";
-import logger from "@/lib/logger";
+import logger from "../lib/logger";
 
 // Load .env.<NODE_ENV> or fallback to .env
 dotenv.config({
