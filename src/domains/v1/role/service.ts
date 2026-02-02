@@ -1,5 +1,7 @@
+import { AppAbility } from "@/abilities/app.ability";
 import { db } from "@/config/db";
 import { permissions, role_permissions, roles } from "@/db/schema";
+import { RawRuleOf } from "@casl/ability";
 import {
 	and,
 	eq,
@@ -7,6 +9,7 @@ import {
 	InferInsertModel,
 	InferSelectModel
 } from "drizzle-orm";
+import { Permission } from "../permission/service";
 
 type Role = InferSelectModel<typeof roles>;
 type NewRole = InferInsertModel<typeof roles>;
@@ -63,16 +66,23 @@ export const RoleServices = {
 
 		return result;
 	},
-	getPermissions: async (): Promise<any[]> => {
-		return await db
+	getPermissions: async (roleId: number): Promise<Permission[]> => {
+		const data = (await db
 			.select({
-				id: permissions.id
+				id: permissions.id,
+				subject: permissions.subject,
+				action: permissions.action,
+				conditions: permissions.conditions,
+				description: permissions.description,
+				inverted: permissions.inverted
 			})
 			.from(role_permissions)
 			.leftJoin(
 				permissions,
 				eq(role_permissions.permissionId, permissions.id)
-			);
+			)
+			.where(eq(role_permissions.roleId, roleId))) as Permission[];
+		return data;
 	},
 	removePermissions: async (id: number, permissions: number[]) => {
 		return await db

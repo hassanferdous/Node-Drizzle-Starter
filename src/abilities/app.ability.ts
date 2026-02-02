@@ -10,8 +10,7 @@ export const actions = [
 	"create",
 	"read",
 	"update",
-	"delete",
-	"list"
+	"delete"
 ] as const;
 export const subjects = ["User", "Role", "Permission", "all"] as const;
 

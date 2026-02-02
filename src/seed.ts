@@ -1,124 +1,201 @@
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { permissions, role_permissions, roles, usersTable } from "./db/schema";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import "dotenv/config";
+import { InferInsertModel } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/node-postgres";
 import { config } from "./config";
+import {
+	permissions,
+	role_permissions,
+	roles,
+	user_roles,
+	usersTable
+} from "./db/schema";
 const db = drizzle(config.db.uri);
 
+const usersData: InferInsertModel<typeof usersTable>[] = [
+	{
+		email: "admin@gmail.com",
+		password: "password"
+	},
+	{
+		email: "moderator@gmail.com",
+		password: "password"
+	},
+	{
+		email: "user@gmail.com",
+		password: "password"
+	}
+];
+
+const rolesData: InferInsertModel<typeof roles>[] = [
+	{
+		name: "admin",
+		description: "Super admin role",
+		parentId: null
+	},
+	{
+		name: "moderator",
+		description: "Moderator role",
+		parentId: 1
+	},
+	{
+		name: "user",
+		description: "User role",
+		parentId: null
+	}
+];
+
+const permissionsData: InferInsertModel<typeof permissions>[] = [
+	// User Permissions
+	{
+		subject: "all",
+		action: "manage",
+		description: "Manage all",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "User",
+		action: "create",
+		description: "Create user",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "User",
+		action: "read",
+		description: "Read user",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "User",
+		action: "update",
+		description: "Update user",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "User",
+		action: "delete",
+		description: "Delete user",
+		conditions: null,
+		inverted: false
+	},
+
+	// Role Permissions
+	{
+		subject: "Role",
+		action: "create",
+		description: "Create role",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "Role",
+		action: "read",
+		description: "Read role",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "Role",
+		action: "update",
+		description: "Update role",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "Role",
+		action: "delete",
+		description: "Delete role",
+		conditions: null,
+		inverted: false
+	},
+
+	// Permission Permissions
+	{
+		subject: "Permission",
+		action: "create",
+		description: "Create permission",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "Permission",
+		action: "read",
+		description: "Read permission",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "Permission",
+		action: "update",
+		description: "Update permission",
+		conditions: null,
+		inverted: false
+	},
+	{
+		subject: "Permission",
+		action: "delete",
+		description: "Delete permission",
+		conditions: null,
+		inverted: false
+	}
+];
+
+const userRolesData: InferInsertModel<typeof user_roles>[] = [
+	{
+		userId: 1,
+		roleId: 1,
+		scopeType: "global",
+		scopeId: null
+	},
+	{
+		userId: 2,
+		roleId: 2,
+		scopeType: "global",
+		scopeId: null
+	},
+	{
+		userId: 3,
+		roleId: 3,
+		scopeType: "global",
+		scopeId: null
+	}
+];
+
+const rolePermissionsData: InferInsertModel<typeof role_permissions>[] = [
+	{
+		roleId: 1,
+		permissionId: 1
+	}
+];
+
 async function seedDefaultRolesAndPermissions() {
-	// 1. Seed roles
-	const roleNames = ["admin", "user", "guest"];
-	const existingRoles = await db.select().from(roles);
+	// delete all data
+	await db.delete(user_roles);
+	await db.delete(role_permissions);
+	await db.delete(roles);
+	await db.delete(permissions);
+	await db.delete(usersTable);
 
-	const roleMap: Record<string, number> = {};
-
-	for (const roleName of roleNames) {
-		let role = existingRoles.find((r) => r.name === roleName);
-		if (!role) {
-			const inserted = await db
-				.insert(roles)
-				.values({ name: roleName })
-				.returning();
-			role = inserted[0];
-		}
-		roleMap[roleName] = role.id;
-	}
-
-	// 2. Seed permissions
-	const permissionNames = [
-		// Users
-		"user:manage",
-		"user:create",
-		"user:delete",
-		"user:update",
-		"user:read",
-		"user:read:self",
-		"user:udpate:self",
-
-		// Posts
-		"post:manage",
-		"post:create",
-		"post:read",
-		"post:delete",
-		"post:update",
-		"post:update:self",
-		"post:delete:self",
-
-		// Roles
-		"role:manage",
-		"role:create",
-		"role:read",
-		"role:update",
-		"role:delete",
-
-		// Permissions
-		"permission:manage",
-		"permission:create",
-		"permission:read",
-		"permission:update",
-		"permission:delete"
-	];
-
-	const existingPermissions = await db.select().from(permissions);
-	const permissionMap: Record<string, number> = {};
-
-	for (const permName of permissionNames) {
-		let perm = existingPermissions.find((p) => p.name === permName);
-		if (!perm) {
-			const inserted = await db
-				.insert(permissions)
-				.values({ name: permName })
-				.returning();
-			perm = inserted[0];
-		}
-		permissionMap[perm.name] = perm.id;
-	}
-
-	// 3. Assign permissions to "admin" role
-	const adminRoleId = roleMap["admin"];
-	const existingRolePerms = await db
-		.select()
-		.from(role_permissions)
-		.where(eq(role_permissions.roleId, adminRoleId));
-
-	const existingPermissionIds = existingRolePerms.map((rp) => rp.permissionId);
-
-	const newRolePermissions = Object.values(permissionMap)
-		.filter((pid) => !existingPermissionIds.includes(pid))
-		.map((pid) => ({
-			roleId: adminRoleId,
-			permissionId: pid
-		}));
-
-	if (newRolePermissions.length > 0) {
-		await db.insert(role_permissions).values(newRolePermissions);
-	}
-
-	// 4. Seed default admin user
-	const defaultAdminEmail = "admin@gmail.com";
-	const existingAdmin = await db
-		.select()
-		.from(usersTable)
-		.where(eq(usersTable.email, defaultAdminEmail));
-
-	if (existingAdmin.length === 0) {
-		const salt = await bcrypt.genSalt(
-			Number(process.env.HASH_SALT as string)
-		);
-		const hashedPassword = await bcrypt.hash("test1234", salt);
-		await db.insert(usersTable).values({
-			name: "Admin",
-			email: defaultAdminEmail,
-			password: hashedPassword,
-			roleId: adminRoleId
-		});
-		console.log("✅ Default admin user created.");
-	} else {
-		console.log("ℹ️ Default admin user already exists.");
-	}
-
-	console.log("✅ Roles and permissions seeded successfully.");
+	// insert data
+	const salt = await bcrypt.genSalt(Number(process.env.HASH_SALT as string));
+	const hashedPassword = await bcrypt.hash(usersData[0].password, salt);
+	await db.insert(roles).values(rolesData);
+	await db.insert(permissions).values(permissionsData);
+	await db.insert(role_permissions).values(rolePermissionsData);
+	await db.insert(usersTable).values(
+		usersData.map((user) => {
+			return {
+				...user,
+				password: hashedPassword
+			};
+		})
+	);
+	await db.insert(user_roles).values(userRolesData);
+	console.log("✅ Default roles and permissions seeded successfully");
 }
 
 async function main() {

@@ -90,41 +90,59 @@ export const UserServices = {
 	getUserRolePermissions: async (
 		id: number
 	): Promise<{ roles: Role[]; permissions: RawRuleOf<AppAbility>[] }> => {
-		const query = await db.execute(sql`with recursive
-													role_tree as (
-														select
-															r.id,
-															r.parent_id,
-															r.name
-														from
-															roles r
-															inner join user_roles ur on r.id = ur.role_id
-														where
-															ur.user_id = ${id}
-														union all
-														select
-															parent.id,
-															parent.parent_id,
-															parent.name
-														from
-															roles parent
-															inner join role_tree rt on rt.id = parent.parent_id
-													)
-												select
-													role_tree.id as role_id,
-													role_tree.name as role_name,
-													p.subject,
-													p.action,
-													p.conditions,
-													p.description,
-													p.id as permission_id,
-													p.inverted
-												from
-													role_tree
-													left join role_permissions rp on role_tree.id = rp.role_id
-													left join permissions p on p.id = rp.permission_id where p.inverted = false;`);
+		const query = await db.execute(sql`
+					WITH RECURSIVE role_tree AS (
+						SELECT
+							r.id,
+							r.parent_id,
+							r.name
+						FROM roles r
+						INNER JOIN user_roles ur ON r.id = ur.role_id
+						WHERE ur.user_id = ${id}
+
+						UNION ALL
+
+						SELECT
+							parent.id,
+							parent.parent_id,
+							parent.name
+						FROM roles parent
+						INNER JOIN role_tree rt ON rt.id = parent.parent_id
+					)
+					SELECT
+						role_tree.id AS role_id,
+						role_tree.name AS role_name,
+						p.subject,
+						p.action,
+						p.conditions,
+						p.description,
+						p.id AS permission_id,
+						p.inverted
+					FROM role_tree
+					LEFT JOIN role_permissions rp ON role_tree.id = rp.role_id
+					LEFT JOIN permissions p ON p.id = rp.permission_id
+
+					UNION ALL
+
+					SELECT
+						NULL AS role_id,
+						NULL AS role_name,
+						p.subject,
+						p.action,
+						p.conditions,
+						p.description,
+						p.id AS permission_id,
+						p.inverted
+					FROM access_restrictions ar
+					INNER JOIN permissions p ON p.id = ar.permission_id
+					WHERE ar.user_id = ${id};
+					`);
 		const roles = [
-			...new Set(query.rows.map((item) => item.role_name))
+			...new Set(
+				query.rows
+					.filter((item) => item.role_name)
+					.map((item) => item.role_name)
+			)
 		] as Role[];
 		const permissions = query.rows
 			.filter((item) => item.permission_id)

@@ -46,6 +46,23 @@ export const permissions = pgTable("permissions", {
 });
 
 // --------------------
+// Permissions (Action on Resource)
+// --------------------
+export const access_restrictions = pgTable(
+	"access_restrictions",
+	{
+		userId: integer("user_id").references(() => usersTable.id, {
+			onDelete: "cascade"
+		}),
+		permissionId: integer("permission_id").references(() => permissions.id, {
+			onDelete: "cascade"
+		}),
+		...timestampColumns
+	},
+	(table) => [primaryKey({ columns: [table.userId, table.permissionId] })]
+);
+
+// --------------------
 // Role → Permission Mapping
 // --------------------
 export const role_permissions = pgTable(
@@ -58,9 +75,19 @@ export const role_permissions = pgTable(
 			onDelete: "cascade"
 		})
 	},
-	(table) => ({
-		pk: primaryKey({ columns: [table.roleId, table.permissionId] })
-	})
+	(table) => [
+		primaryKey({ columns: [table.roleId, table.permissionId] }),
+		foreignKey({
+			columns: [table.roleId],
+			foreignColumns: [roles.id],
+			name: "role_permissions_role_id"
+		}),
+		foreignKey({
+			columns: [table.permissionId],
+			foreignColumns: [permissions.id],
+			name: "role_permissions_permission_id"
+		})
+	]
 );
 
 // --------------------
